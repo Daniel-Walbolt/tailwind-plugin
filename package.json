@@ -2,7 +2,9 @@
   "name": "tailwind-layer-parser",
   "version": "1.0.0",
   "description": "Provides tools to parse your custom .css files, format them, and add them to TailwindCSS's utility and component style lists.",
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
