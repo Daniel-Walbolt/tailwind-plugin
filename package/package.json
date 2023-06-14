@@ -1,0 +1,37 @@
+{
+  "name": "tailwind-layer-parser",
+  "version": "1.0.0",
+  "description": "Provides tools to parse your custom .css files, format them, and add them to TailwindCSS's utility and component style lists.",
+  "main": "src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "lint": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Tailwind",
+    "Custom",
+    "CSS",
+    "Custom-CSS",
+    "Custom-Style",
+    "Styling",
+    "Web-Development",
+    "TailwindCSS",
+    "Intellisense",
+    "Frontend"
+  ],
+  "author": "Daniel Walbolt",
+  "license": "ISC",
+  "dependencies": {
+    "path": "^0.12.7",
+    "postcss": "^8.4.24",
+    "tsup": "^6.7.0",
+    "typescript": "^5.1.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.3.1"
+  }
+}
