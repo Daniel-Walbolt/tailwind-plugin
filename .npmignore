@@ -1,6 +1,6 @@
 src
+!dist
 test-folder
 .changeset
 .github
 tsconfig.json
-package-lock.json
