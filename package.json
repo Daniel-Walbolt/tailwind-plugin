@@ -9,8 +9,11 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "lint": "tsc",
-    "release": "npm run lint && npm run build"
+    "release": "npm run lint && npm run build && npm publish"
   },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "Tailwind",
     "Custom",

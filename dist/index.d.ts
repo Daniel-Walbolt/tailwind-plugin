@@ -4,7 +4,7 @@ type LayerListObject = {
     utilities: Node[];
     components: Node[];
 };
-type CustomTailwindConfig = {
+type LayerParserConfig = {
     /**
      * The path of the directory that you want to be added.
      *
@@ -19,10 +19,16 @@ type CustomTailwindConfig = {
      * @param undefined Do not add classes that do not belong to a tailwind layer.
      */
     addClassesWithoutLayerAsUtilities?: boolean;
+    /**
+     * Should this plugin parse files that are in nested directories?
+     *
+     * Defaults to TRUE
+     */
+    parseNestedDirectories?: boolean;
 };
 
-declare const _default: (config: CustomTailwindConfig) => LayerListObject;
+declare const _default: (config: LayerParserConfig) => LayerListObject;
 
 declare function ParseCSSDirectoryPlugin(directoryPath: any): (addUtilities: any, addComponents: any, e: any) => void;
 
-export { CustomTailwindConfig, LayerListObject, ParseCSSDirectoryPlugin, _default as cssParser };
+export { LayerListObject, LayerParserConfig, ParseCSSDirectoryPlugin, _default as cssParser };

@@ -5842,6 +5842,7 @@ var Root = import_postcss.default.Root;
 var Node = import_postcss.default.Node;
 
 // src/cssParser.ts
+var fg = require("fast-glob");
 function fixRuleIndentation(node, nesting = 1) {
   if (node.nodes == void 0 || node.nodes.length == 0) {
     return;
@@ -5938,7 +5939,13 @@ var cssParser_default = (config) => {
     };
   }
   let resolvedDirectory = (0, import_path.resolve)(config.directory);
-  let result = (0, import_fs.readdirSync)(resolvedDirectory);
+  let result = [];
+  config.parseNestedDirectories ?? (config.parseNestedDirectories = true);
+  if (config.parseNestedDirectories) {
+    result = fg.sync(`${resolvedDirectory}/**/*.css`);
+  } else {
+    result = (0, import_fs.readdirSync)(resolvedDirectory);
+  }
   for (let path of result) {
     if (!path.endsWith(".css")) {
       continue;
@@ -5957,7 +5964,7 @@ var cssParser_default = (config) => {
 // src/index.ts
 function ParseCSSDirectoryPlugin(directoryPath) {
   return (addUtilities, addComponents, e) => {
-    const classes = cssParser_default(directoryPath);
+    const classes = cssParser_default({ directory: directoryPath });
     for (let utility of classes.utilities) {
       addUtilities(e(utility));
     }
