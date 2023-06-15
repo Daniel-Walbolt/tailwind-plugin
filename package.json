@@ -1,6 +1,6 @@
 {
   "name": "tailwind-layer-parser",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "description": "Provides tools to parse your custom .css files, format them, and add them to TailwindCSS's utility and component style lists.",
   "private": false,
   "main": "./dist/index.js",
@@ -31,6 +31,9 @@
   },
   "homepage": "https://github.com/Daniel-Walbolt/tailwind-plugin#tailwind-layer-parser",
   "bugs": "https://github.com/Daniel-Walbolt/tailwind-plugin/issues",
+  "peerDependencies": {
+    "path": "^0.12.7"
+  },
   "devDependencies": {
     "path": "^0.12.7",
     "postcss": "^8.4.24",
