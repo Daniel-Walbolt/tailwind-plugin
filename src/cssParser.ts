@@ -9,7 +9,8 @@ import postcss, {
 	Result,
 	Rule,
 } from 'postcss';
-import { CustomTailwindConfig, LayerListObject } from './types';
+import { LayerParserConfig, LayerListObject } from './types';
+const fg = require('fast-glob');
 
 /**
  * Function for fixing the indentation of a rule and it's nested rules.
@@ -69,7 +70,7 @@ function adjustRuleRaws(rule: Node, result: Result) {
 	rule.raws.after = '\n';
 }
 
-export default (config: CustomTailwindConfig): LayerListObject => {
+export default (config: LayerParserConfig): LayerListObject => {
 	// Store the sum of components and utilities from every document in the directory
 	let componentList: Node[] = [];
 	let utilityList: Node[] = [];
@@ -138,7 +139,13 @@ export default (config: CustomTailwindConfig): LayerListObject => {
 	}
 
 	let resolvedDirectory = resolve(config.directory);
-	let result = readdirSync(resolvedDirectory);
+
+	let result: string[] = [];
+	if (config.parseNestedDirectories) {
+		result = fg.sync(`${resolvedDirectory}/**/*.css`);
+	} else {
+		result = readdirSync(resolvedDirectory);
+	}
 	for (let path of result) {
 		if (!path.endsWith('.css')) {
 			continue;

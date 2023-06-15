@@ -5,7 +5,7 @@ export type LayerListObject = {
 	components: Node[];
 };
 
-export type CustomTailwindConfig = {
+export type LayerParserConfig = {
 	/**
 	 * The path of the directory that you want to be added.
 	 *
@@ -21,4 +21,11 @@ export type CustomTailwindConfig = {
 	 * @param undefined Do not add classes that do not belong to a tailwind layer.
 	 */
 	addClassesWithoutLayerAsUtilities?: boolean;
+
+	/**
+	 * Should this plugin parse files that are in nested directories?
+	 *
+	 * Defaults to TRUE
+	 */
+	parseNestedDirectories: boolean;
 };
