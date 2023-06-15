@@ -24,7 +24,7 @@
     "Frontend"
   ],
   "author": "Daniel Walbolt",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "path": "^0.12.7",
     "postcss": "^8.4.24",
