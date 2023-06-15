@@ -1,9 +1,26 @@
 var __create = Object.create;
 var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
 var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
@@ -28,6 +45,26 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var __async = (__this, __arguments, generator) => {
+  return new Promise((resolve2, reject) => {
+    var fulfilled = (value) => {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var rejected = (value) => {
+      try {
+        step(generator.throw(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var step = (x) => x.done ? resolve2(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+    step((generator = generator.apply(__this, __arguments)).next());
+  });
+};
 
 // node_modules/fast-glob/out/utils/array.js
 var require_array = __commonJS({
@@ -452,7 +489,7 @@ var require_to_regex_range = __commonJS({
       if (isNumber(max) === false) {
         throw new TypeError("toRegexRange: expected the second argument to be a number.");
       }
-      let opts = { relaxZeros: true, ...options };
+      let opts = __spreadValues({ relaxZeros: true }, options);
       if (typeof opts.strictZeros === "boolean") {
         opts.relaxZeros = opts.strictZeros === false;
       }
@@ -727,7 +764,7 @@ var require_fill_range = __commonJS({
     };
     var toRange = (a, b, isNumbers, options) => {
       if (isNumbers) {
-        return toRegexRange(a, b, { wrap: false, ...options });
+        return toRegexRange(a, b, __spreadValues({ wrap: false }, options));
       }
       let start = String.fromCharCode(a);
       if (a === b)
@@ -795,7 +832,7 @@ var require_fill_range = __commonJS({
         index++;
       }
       if (options.toRegex === true) {
-        return step > 1 ? toSequence(parts, options) : toRegex(range, null, { wrap: false, ...options });
+        return step > 1 ? toSequence(parts, options) : toRegex(range, null, __spreadValues({ wrap: false }, options));
       }
       return range;
     };
@@ -837,7 +874,7 @@ var require_fill_range = __commonJS({
       if (isObject(step)) {
         return fill(start, end, 0, step);
       }
-      let opts = { ...options };
+      let opts = __spreadValues({}, options);
       if (opts.capture === true)
         opts.wrap = true;
       step = step || opts.step || 1;
@@ -888,7 +925,7 @@ var require_compile = __commonJS({
         }
         if (node.nodes && node.ranges > 0) {
           let args = utils.reduce(node.nodes);
-          let range = fill(...args, { ...options, wrap: false, toRegex: true });
+          let range = fill(...args, __spreadProps(__spreadValues({}, options), { wrap: false, toRegex: true }));
           if (range.length !== 0) {
             return args.length > 1 && range.length > 1 ? `(${range})` : range;
           }
@@ -1450,8 +1487,7 @@ var require_constants2 = __commonJS({
       STAR,
       START_ANCHOR
     };
-    var WINDOWS_CHARS = {
-      ...POSIX_CHARS,
+    var WINDOWS_CHARS = __spreadProps(__spreadValues({}, POSIX_CHARS), {
       SLASH_LITERAL: `[${WIN_SLASH}]`,
       QMARK: WIN_NO_SLASH,
       STAR: `${WIN_NO_SLASH}*?`,
@@ -1463,7 +1499,7 @@ var require_constants2 = __commonJS({
       QMARK_NO_DOT: `[^.${WIN_SLASH}]`,
       START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
       END_ANCHOR: `(?:[${WIN_SLASH}]|$)`
-    };
+    });
     var POSIX_REGEX_SOURCE = {
       alnum: "a-zA-Z0-9",
       alpha: "a-zA-Z",
@@ -2038,7 +2074,7 @@ var require_parse2 = __commonJS({
         throw new TypeError("Expected a string");
       }
       input = REPLACEMENTS[input] || input;
-      const opts = { ...options };
+      const opts = __spreadValues({}, options);
       const max = typeof opts.maxLength === "number" ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
       let len = input.length;
       if (len > max) {
@@ -2161,7 +2197,7 @@ var require_parse2 = __commonJS({
         prev = tok;
       };
       const extglobOpen = (type, value2) => {
-        const token = { ...EXTGLOB_CHARS[value2], conditions: 1, inner: "" };
+        const token = __spreadProps(__spreadValues({}, EXTGLOB_CHARS[value2]), { conditions: 1, inner: "" });
         token.prev = prev;
         token.parens = state.parens;
         token.output = state.output;
@@ -2183,7 +2219,7 @@ var require_parse2 = __commonJS({
             output = token.close = `)$))${extglobStar}`;
           }
           if (token.inner.includes("*") && (rest = remaining()) && /^\.[^\\/.]+$/.test(rest)) {
-            const expression = parse(rest, { ...options, fastpaths: false }).output;
+            const expression = parse(rest, __spreadProps(__spreadValues({}, options), { fastpaths: false })).output;
             output = token.close = `)${expression})${extglobStar})`;
           }
           if (token.prev.type === "bos") {
@@ -2713,7 +2749,7 @@ var require_parse2 = __commonJS({
       return state;
     };
     parse.fastpaths = (input, options) => {
-      const opts = { ...options };
+      const opts = __spreadValues({}, options);
       const max = typeof opts.maxLength === "number" ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
       const len = input.length;
       if (len > max) {
@@ -2819,7 +2855,7 @@ var require_picomatch = __commonJS({
       delete regex.state;
       let isIgnored = () => false;
       if (opts.ignore) {
-        const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
+        const ignoreOpts = __spreadProps(__spreadValues({}, options), { ignore: null, onMatch: null, onResult: null });
         isIgnored = picomatch(opts.ignore, ignoreOpts, returnState);
       }
       const matcher = (input, returnObject = false) => {
@@ -2881,7 +2917,7 @@ var require_picomatch = __commonJS({
     picomatch.parse = (pattern, options) => {
       if (Array.isArray(pattern))
         return pattern.map((p) => picomatch.parse(p, options));
-      return parse(pattern, { ...options, fastpaths: false });
+      return parse(pattern, __spreadProps(__spreadValues({}, options), { fastpaths: false }));
     };
     picomatch.scan = (input, options) => scan(input, options);
     picomatch.compileRe = (state, options, returnOutput = false, returnState = false) => {
@@ -2960,7 +2996,7 @@ var require_micromatch = __commonJS({
         }
       };
       for (let i = 0; i < patterns.length; i++) {
-        let isMatch = picomatch(String(patterns[i]), { ...options, onResult }, true);
+        let isMatch = picomatch(String(patterns[i]), __spreadProps(__spreadValues({}, options), { onResult }), true);
         let negated = isMatch.state.negated || isMatch.state.negatedExtglob;
         if (negated)
           negatives++;
@@ -3002,7 +3038,7 @@ var require_micromatch = __commonJS({
           options.onResult(state);
         items.push(state.output);
       };
-      let matches = new Set(micromatch(list, patterns, { ...options, onResult }));
+      let matches = new Set(micromatch(list, patterns, __spreadProps(__spreadValues({}, options), { onResult })));
       for (let item of items) {
         if (!matches.has(item)) {
           result.add(item);
@@ -3025,7 +3061,7 @@ var require_micromatch = __commonJS({
           return true;
         }
       }
-      return micromatch.isMatch(str, pattern, { ...options, contains: true });
+      return micromatch.isMatch(str, pattern, __spreadProps(__spreadValues({}, options), { contains: true }));
     };
     micromatch.matchKeys = (obj, patterns, options) => {
       if (!utils.isObject(obj)) {
@@ -3065,7 +3101,7 @@ var require_micromatch = __commonJS({
     };
     micromatch.capture = (glob, input, options) => {
       let posix = utils.isWindows(options);
-      let regex = picomatch.makeRe(String(glob), { ...options, capture: true });
+      let regex = picomatch.makeRe(String(glob), __spreadProps(__spreadValues({}, options), { capture: true }));
       let match = regex.exec(posix ? utils.toPosixSlashes(input) : input);
       if (match) {
         return match.slice(1).map((v) => v === void 0 ? "" : v);
@@ -3093,7 +3129,7 @@ var require_micromatch = __commonJS({
     micromatch.braceExpand = (pattern, options) => {
       if (typeof pattern !== "string")
         throw new TypeError("Expected a string");
-      return micromatch.braces(pattern, { ...options, expand: true });
+      return micromatch.braces(pattern, __spreadProps(__spreadValues({}, options), { expand: true }));
     };
     module2.exports = micromatch;
   }
@@ -4845,13 +4881,15 @@ var require_async5 = __commonJS({
           });
         });
       }
-      async static(patterns, options) {
-        const entries = [];
-        const stream = this._readerStream.static(patterns, options);
-        return new Promise((resolve2, reject) => {
-          stream.once("error", reject);
-          stream.on("data", (entry) => entries.push(entry));
-          stream.once("end", () => resolve2(entries));
+      static(patterns, options) {
+        return __async(this, null, function* () {
+          const entries = [];
+          const stream = this._readerStream.static(patterns, options);
+          return new Promise((resolve2, reject) => {
+            stream.once("error", reject);
+            stream.on("data", (entry) => entries.push(entry));
+            stream.once("end", () => resolve2(entries));
+          });
         });
       }
     };
@@ -5199,11 +5237,13 @@ var require_async6 = __commonJS({
         super(...arguments);
         this._reader = new async_1.default(this._settings);
       }
-      async read(task) {
-        const root = this._getRootDirectory(task);
-        const options = this._getReaderOptions(task);
-        const entries = await this.api(root, task, options);
-        return entries.map((entry) => options.transform(entry));
+      read(task) {
+        return __async(this, null, function* () {
+          const root = this._getRootDirectory(task);
+          const options = this._getReaderOptions(task);
+          const entries = yield this.api(root, task, options);
+          return entries.map((entry) => options.transform(entry));
+        });
       }
       api(root, task, options) {
         if (task.dynamic) {
@@ -5397,11 +5437,13 @@ var require_out4 = __commonJS({
     var sync_1 = require_sync6();
     var settings_1 = require_settings4();
     var utils = require_utils3();
-    async function FastGlob(source, options) {
-      assertPatternsInput(source);
-      const works = getWorks(source, async_1.default, options);
-      const result = await Promise.all(works);
-      return utils.array.flatten(result);
+    function FastGlob(source, options) {
+      return __async(this, null, function* () {
+        assertPatternsInput(source);
+        const works = getWorks(source, async_1.default, options);
+        const result = yield Promise.all(works);
+        return utils.array.flatten(result);
+      });
     }
     (function(FastGlob2) {
       function sync(source, options) {
@@ -5465,6 +5507,7 @@ module.exports = __toCommonJS(src_exports);
 var import_fs = require("fs");
 var import_path = require("path");
 var import_postcss = __toESM(require("postcss"));
+var import_glob = require("glob");
 var fg = require_out4();
 function fixRuleIndentation(node, nesting = 1) {
   if (node.nodes == void 0 || node.nodes.length == 0) {
@@ -5504,6 +5547,7 @@ function adjustRuleRaws(rule, result) {
   rule.raws.after = "\n";
 }
 var cssParser_default = (config) => {
+  var _a;
   let componentList = [];
   let utilityList = [];
   let missedRules = [];
@@ -5517,9 +5561,9 @@ var cssParser_default = (config) => {
     return (opts = {}) => {
       return {
         Rule(rule, { result: result2 }) {
-          var _a, _b;
+          var _a2, _b;
           if (!processedRules.has(rule.selector)) {
-            if (((_a = rule.parent) == null ? void 0 : _a.type) == "root") {
+            if (((_a2 = rule.parent) == null ? void 0 : _a2.type) == "root") {
               if (config.addClassesWithoutLayerAsUtilities == void 0) {
                 missedRules.push(rule);
                 return;
@@ -5551,14 +5595,16 @@ var cssParser_default = (config) => {
   }
   if (config.directory == void 0) {
     console.error(
-      "There was no directory provided. Defaulting to current working directory."
+      "There was no directory provided. Defaulting to process.cwd()."
     );
-    config.directory = "/";
+    config.directory = process.cwd();
   }
   let resolvedDirectory = (0, import_path.resolve)(config.directory);
   let result = [];
-  config.globPatterns ?? (config.globPatterns = [`${resolvedDirectory}/**/*.css`]);
-  result = fg.sync(...config.globPatterns);
+  (_a = config.globPatterns) != null ? _a : config.globPatterns = [`**/*.css`];
+  result = (0, import_glob.globSync)(config.globPatterns, {
+    cwd: resolvedDirectory
+  });
   if (config.debug) {
     console.log(`Searched directory: ${resolvedDirectory}`);
     console.log(result);
