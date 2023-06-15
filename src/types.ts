@@ -27,5 +27,5 @@ export type LayerParserConfig = {
 	 *
 	 * Defaults to TRUE
 	 */
-	parseNestedDirectories: boolean;
+	parseNestedDirectories?: boolean;
 };

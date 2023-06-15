@@ -141,6 +141,7 @@ export default (config: LayerParserConfig): LayerListObject => {
 	let resolvedDirectory = resolve(config.directory);
 
 	let result: string[] = [];
+	config.parseNestedDirectories ??= true;
 	if (config.parseNestedDirectories) {
 		result = fg.sync(`${resolvedDirectory}/**/*.css`);
 	} else {
