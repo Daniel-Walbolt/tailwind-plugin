@@ -3,7 +3,7 @@ export * from './types';
 
 function ParseCSSDirectoryPlugin(directoryPath) {
 	return (addUtilities, addComponents, e) => {
-		const classes = cssParser(directoryPath);
+		const classes = cssParser({ directory: directoryPath });
 		for (let utility of classes.utilities) {
 			addUtilities(e(utility));
 		}
