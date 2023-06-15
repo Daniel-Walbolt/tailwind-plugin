@@ -148,6 +148,7 @@ export default (config: LayerParserConfig): LayerListObject => {
 		result = readdirSync(resolvedDirectory);
 	}
 	for (let path of result) {
+		console.log(`Found file: ${path}`);
 		if (!path.endsWith('.css')) {
 			continue;
 		}
