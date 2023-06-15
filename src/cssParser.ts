@@ -10,6 +10,7 @@ import postcss, {
 	Rule,
 } from 'postcss';
 import { LayerParserConfig, LayerListObject } from './types';
+import { globSync } from 'glob';
 const fg = require('fast-glob');
 
 /**
@@ -128,17 +129,19 @@ export default (config: LayerParserConfig): LayerListObject => {
 
 	if (config.directory == undefined) {
 		console.error(
-			'There was no directory provided. Defaulting to current working directory.'
+			'There was no directory provided. Defaulting to process.cwd().'
 		);
-		config.directory = '/';
+		config.directory = process.cwd();
 	}
 
 	// Resolve the directory provided by the user
 	let resolvedDirectory = resolve(config.directory);
 
 	let result: string[] = [];
-	config.globPatterns ??= [`${resolvedDirectory}/**/*.css`];
-	result = fg.sync(...config.globPatterns);
+	config.globPatterns ??= [`**/*.css`];
+	result = globSync(config.globPatterns, {
+		cwd: resolvedDirectory,
+	});
 
 	if (config.debug) {
 		console.log(`Searched directory: ${resolvedDirectory}`);
