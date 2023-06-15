@@ -15,7 +15,9 @@ const fg = require('fast-glob');
 /**
  * Function for fixing the indentation of a rule and it's nested rules.
  *
- * Without this method, the identation from being in layers
+ * Without this method, the identation from being in layers would persist after being picked from the layer.
+ *
+ * Recursively calls itself to fix nested rules.
  * @param node
  * @param nesting
  * @returns
@@ -55,8 +57,6 @@ function fixRuleIndentation(node: Rule | AtRule, nesting = 1) {
 	}
 }
 
-function fixDeclarations(declaration: Declaration) {}
-
 /**
  * Used for adjusting a rule's before and after whitespace.
  *
@@ -74,6 +74,7 @@ export default (config: LayerParserConfig): LayerListObject => {
 	// Store the sum of components and utilities from every document in the directory
 	let componentList: Node[] = [];
 	let utilityList: Node[] = [];
+	let missedRules: Node[] = [];
 	// Used for not adding the same rule twice
 	let processedRules: Set<string> = new Set();
 	let cssParser: Plugin = {
@@ -87,76 +88,86 @@ export default (config: LayerParserConfig): LayerListObject => {
 	 * @layer utilities and @layer components as well as non-nested rules.
 	 */
 	function getParser() {
-		let documentComponents: Node[] = [];
-		let documentUtilities: Node[] = [];
 		return (opts = {}) => {
 			return {
-				Once(document: Document) {
-					documentComponents = [];
-					documentUtilities = [];
-				},
 				Rule(rule: Rule, { result }) {
 					// Only add rules that have not been added yet
 					if (!processedRules.has(rule.selector)) {
-						if ((rule.parent as AtRule).params == undefined) {
+						if (rule.parent?.type == 'root') {
+							if (config.addClassesWithoutLayerAsUtilities == undefined) {
+								missedRules.push(rule);
+								return;
+							}
 							// This rule is not in a layer, so add it as a utility by default
 							fixRuleIndentation(rule);
 							adjustRuleRaws(rule, result as Result);
-							documentUtilities.push(rule);
-						} else {
+							if (config.addClassesWithoutLayerAsUtilities == true) {
+								utilityList.push(rule);
+							} else if (config.addClassesWithoutLayerAsUtilities == false) {
+								componentList.push(rule);
+							}
+						} else if (rule.parent?.type == 'atrule') {
 							const atRuleParent: AtRule = rule.parent as AtRule;
 							// This rule is in an @Rule, check whether it's component or utility layer
 							if (atRuleParent.params == 'components') {
 								fixRuleIndentation(rule);
 								adjustRuleRaws(rule, result as Result);
-								documentComponents.push(rule);
+								componentList.push(rule);
 							} else if (atRuleParent.params == 'utilities') {
 								fixRuleIndentation(rule);
 								adjustRuleRaws(rule, result as Result);
-								documentUtilities.push(rule);
+								utilityList.push(rule);
 							}
 						}
 						processedRules.add(rule.selector);
 					}
-				},
-				Declaration(declaration: Declaration) {
-					fixDeclarations(declaration);
-				},
-				OnceExit(document: Document, { result }) {
-					componentList.push(...documentComponents);
-					utilityList.push(...documentUtilities);
 				},
 			};
 		};
 	}
 
 	if (config.directory == undefined) {
-		console.error('There was no directory provided');
-		return {
-			components: [],
-			utilities: [],
-		};
+		console.error(
+			'There was no directory provided. Defaulting to current working directory.'
+		);
+		config.directory = '/';
 	}
 
+	// Resolve the directory provided by the user
 	let resolvedDirectory = resolve(config.directory);
 
 	let result: string[] = [];
-	config.parseNestedDirectories ??= true;
-	if (config.parseNestedDirectories) {
-		result = fg.sync(`${resolvedDirectory}/**/*.css`);
-	} else {
-		result = readdirSync(resolvedDirectory);
+	config.globPatterns ??= [`${resolvedDirectory}/**/*.css`];
+	result = fg.sync(...config.globPatterns);
+
+	if (config.debug) {
+		console.log(`Searched directory: ${resolvedDirectory}`);
+		console.log(result);
 	}
-	for (let path of result) {
-		console.log(`Found file: ${path}`);
-		if (!path.endsWith('.css')) {
+
+	let invalidFiles = [];
+	for (let fileName of result) {
+		if (!fileName.endsWith('.css')) {
+			invalidFiles.push(fileName);
 			continue;
 		}
-		let fullPath = resolve(resolvedDirectory, path);
+		let fullPath = resolve(resolvedDirectory, fileName);
 		let file = readFileSync(fullPath, 'utf8');
 		postcss([cssParser])
-			.process(file, { from: path })
+			.process(file, { from: fileName })
 			.then((result) => {});
+	}
+
+	if (invalidFiles.length > 0) {
+		console.error(
+			`Globbing resulted in files that did not end in .css ${invalidFiles}`
+		);
+	}
+
+	if (missedRules.length > 0) {
+		console.error(
+			`The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`
+		);
 	}
 
 	return {
