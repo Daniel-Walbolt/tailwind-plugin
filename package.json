@@ -32,7 +32,6 @@
   "homepage": "https://github.com/Daniel-Walbolt/tailwind-plugin#tailwind-layer-parser",
   "bugs": "https://github.com/Daniel-Walbolt/tailwind-plugin/issues",
   "devDependencies": {
-    "@changesets/cli": "^2.26.1",
     "@types/node": "^20.3.1",
     "path": "^0.12.7",
     "postcss": "^8.4.24",
