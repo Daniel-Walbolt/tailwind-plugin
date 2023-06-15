@@ -25,6 +25,12 @@
   ],
   "author": "Daniel Walbolt",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Daniel-Walbolt/tailwind-plugin"
+  },
+  "homepage": "https://github.com/Daniel-Walbolt/tailwind-plugin#tailwind-layer-parser",
+  "bugs": "https://github.com/Daniel-Walbolt/tailwind-plugin/issues",
   "devDependencies": {
     "path": "^0.12.7",
     "postcss": "^8.4.24",

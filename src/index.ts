@@ -1,4 +1,5 @@
-const cssParser = require('./cssParser');
+import cssParser from './cssParser';
+export * from './types';
 
 function ParseCSSDirectoryPlugin(directoryPath) {
 	return (addUtilities, addComponents, e) => {
@@ -13,7 +14,4 @@ function ParseCSSDirectoryPlugin(directoryPath) {
 	};
 }
 
-module.exports = {
-	cssParser,
-	ParseCSSDirectoryPlugin,
-};
+export { cssParser, ParseCSSDirectoryPlugin };

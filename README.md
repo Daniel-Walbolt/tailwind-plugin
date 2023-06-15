@@ -10,9 +10,19 @@ This is extremely useful for mono-repos using similar design across several apps
 
 ## Installation
 
-_Prerequisite: Have TailwindCSS setup in their development environment._
+_Note: This is a plugin for TailwindCSS, and should be used in a TailwindCSS environment._
 
-- `npm i tailwind-layer-parser` | `yarn add tailwind-layer-parser` | `pnpm add tailwind-layer-parser`
+```sh
+npm i tailwind-layer-parser
+```
+
+```sh
+yarn add tailwind-layer-parser
+```
+
+```sh
+pnpm add tailwind-layer-parser
+```
 
 ## Usage
 
