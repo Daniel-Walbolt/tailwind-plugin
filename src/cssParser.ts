@@ -11,7 +11,20 @@ import postcss, {
 } from 'postcss';
 import { LayerParserConfig, LayerListObject } from './types';
 import { globSync } from 'glob';
-const fg = require('fast-glob');
+
+const consoleDisplayName = '[layer-parser]:';
+
+function log(message: string) {
+	console.log(`${consoleDisplayName} ${message}`);
+}
+
+function warn(warning: string) {
+	console.warn(`${consoleDisplayName} ${warning}`);
+}
+
+function error(error: string) {
+	console.error(`${consoleDisplayName} ${error}`);
+}
 
 /**
  * Function for fixing the indentation of a rule and it's nested rules.
@@ -128,9 +141,7 @@ export default (config: LayerParserConfig): LayerListObject => {
 	}
 
 	if (config.directory == undefined) {
-		console.error(
-			'There was no directory provided. Defaulting to process.cwd().'
-		);
+		warn('There was no directory provided. Defaulting to process.cwd().');
 		config.directory = process.cwd();
 	}
 
@@ -144,8 +155,8 @@ export default (config: LayerParserConfig): LayerListObject => {
 	});
 
 	if (config.debug) {
-		console.log(`Searched directory: ${resolvedDirectory}`);
-		console.log(result);
+		log(`Searched directory: ${resolvedDirectory}`);
+		log(`Found: ${result.join('\t')}`);
 	}
 
 	let invalidFiles = [];
@@ -162,13 +173,15 @@ export default (config: LayerParserConfig): LayerListObject => {
 	}
 
 	if (invalidFiles.length > 0) {
-		console.error(
-			`Globbing resulted in files that did not end in .css ${invalidFiles}`
+		error(
+			`Globbing resulted in files that did not end in .css:\n\t${invalidFiles.join(
+				'\n\t'
+			)}`
 		);
 	}
 
 	if (missedRules.length > 0) {
-		console.error(
+		warn(
 			`The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`
 		);
 	}
