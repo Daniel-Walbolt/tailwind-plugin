@@ -36,6 +36,11 @@ type LayerParserConfig = {
 
 declare const _default: (config: LayerParserConfig) => LayerListObject;
 
-declare function ParseCSSDirectoryPlugin(directoryPath: any): (addUtilities: any, addComponents: any, e: any) => void;
+/**
+ * Provides quick and easy usage of the cssParser provided by the tailwind-layer-parser plugin. Call this method in TailwindCSS's plugin()
+ *
+ * Uses the default configuration.
+ */
+declare function ParseCSSDirectoryPlugin(directoryPath?: string): (addUtilities: any, addComponents: any) => void;
 
 export { LayerListObject, LayerParserConfig, ParseCSSDirectoryPlugin, _default as cssParser };
