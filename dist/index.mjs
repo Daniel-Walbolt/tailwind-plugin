@@ -153,13 +153,13 @@ var cssParser_default = (config) => {
 
 // src/index.ts
 function ParseCSSDirectoryPlugin(directoryPath) {
-  return ({ addUtilities, addComponents, e }) => {
+  return ({ addUtilities, addComponents }) => {
     const classes = cssParser_default({ directory: directoryPath, addClassesWithoutLayerAsUtilities: true });
     for (const utility of classes.utilities) {
-      addUtilities(e(utility));
+      addUtilities(utility);
     }
     for (const component of classes.components) {
-      addComponents(e(component));
+      addComponents(component);
     }
   };
 }
