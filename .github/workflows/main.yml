@@ -32,7 +32,7 @@ jobs:
                   message: 'Commit CI build'
                   add: 'dist'
                   tag_push: '--force'
-                  token: ${{ secrets.GITHUB_TOKEN }}
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This gets generated automatically
     publish:
