@@ -13,8 +13,6 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v3
-              with:
-                  token: ${{ secrets.PAT }}
 
             - name: Set up Node.js
               uses: actions/setup-node@v3
@@ -34,6 +32,7 @@ jobs:
                   message: 'Commit CI build'
                   add: 'dist'
                   tag_push: '--force'
+                  token: ${{ secrets.GITHUB_TOKEN }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This gets generated automatically
     publish:
