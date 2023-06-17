@@ -8,17 +8,17 @@ export * from './types';
  */
 function ParseCSSDirectoryPlugin(directoryPath?: string) 
 {
-	return ({ addUtilities, addComponents, e }) => 
+	return ({ addUtilities, addComponents }) => 
 	{
 		const classes = cssParser({ directory: directoryPath, addClassesWithoutLayerAsUtilities: true });
 		for (const utility of classes.utilities) 
 		{
-			addUtilities(e(utility));
+			addUtilities(utility);
 		}
 
 		for (const component of classes.components) 
 		{
-			addComponents(e(component));
+			addComponents(component);
 		}
 	};
 }
