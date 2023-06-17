@@ -30,9 +30,7 @@ jobs:
               with: # More info about the arguments on the action page
                   author_name: Github Build Action
                   message: 'Message for the commit'
-                  path: dist
-                  pattern: '*' # Pattern that matches the files to commit
-                  tag_push: '--force'
+                  add: 'dist'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This gets generated automatically
     publish:
