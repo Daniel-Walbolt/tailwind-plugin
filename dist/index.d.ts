@@ -41,6 +41,10 @@ declare const _default: (config: LayerParserConfig) => LayerListObject;
  *
  * Uses the default configuration.
  */
-declare function ParseCSSDirectoryPlugin(directoryPath?: string): (addUtilities: any, addComponents: any) => void;
+declare function ParseCSSDirectoryPlugin(directoryPath?: string): ({ addUtilities, addComponents, e }: {
+    addUtilities: any;
+    addComponents: any;
+    e: any;
+}) => void;
 
 export { LayerListObject, LayerParserConfig, ParseCSSDirectoryPlugin, _default as cssParser };
