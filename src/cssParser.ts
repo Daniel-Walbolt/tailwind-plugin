@@ -1,28 +1,30 @@
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import postcss, {
-	AtRule,
-	Declaration,
-	Document,
-	Node,
-	Plugin,
-	Result,
-	Rule,
-} from 'postcss';
+import postcss, { AtRule, Node, Plugin, Result, Rule } from 'postcss';
 import { LayerParserConfig, LayerListObject } from './types';
 import { globSync } from 'glob';
 
 const consoleDisplayName = '[layer-parser]:';
+// Store the sum of components and utilities from every document in the directory
+const componentList: Node[] = [];
+const utilityList: Node[] = [];
+const missedRules: Node[] = [];
+// Used for not adding the same rule twice
+const processedRules: Set<string> = new Set();
+const duplicateRules: Node[] = [];
 
-function log(message: string) {
+function log(message: string) 
+{
 	console.log(`${consoleDisplayName} ${message}`);
 }
 
-function warn(warning: string) {
+function warn(warning: string) 
+{
 	console.warn(`${consoleDisplayName} ${warning}`);
 }
 
-function error(error: string) {
+function error(error: string) 
+{
 	console.error(`${consoleDisplayName} ${error}`);
 }
 
@@ -36,8 +38,10 @@ function error(error: string) {
  * @param nesting
  * @returns
  */
-function fixRuleIndentation(node: Rule | AtRule, nesting = 1) {
-	if (node.nodes == undefined || node.nodes.length == 0) {
+function fixRuleIndentation(node: Rule | AtRule, nesting = 1) 
+{
+	if (node.nodes == undefined || node.nodes.length == 0) 
+	{
 		return;
 	}
 
@@ -45,26 +49,32 @@ function fixRuleIndentation(node: Rule | AtRule, nesting = 1) {
 	let innerIndent = '';
 	// The indent for multi-line selectors.
 	let selectorIndents = '';
-	for (let i = 0; i < nesting; i++) {
+	for (let i = 0; i < nesting; i++) 
+	{
 		innerIndent += '\t';
-		if (i < nesting - 1) {
+		if (i < nesting - 1) 
+		{
 			selectorIndents += '\t';
 		}
 	}
 
-	if ((node as Rule).selectors != undefined) {
+	if ((node as Rule).selectors != undefined) 
+	{
 		const rule = node as Rule;
-		let formattedSelectors = rule.selectors.join(`,\n${selectorIndents}`);
+		const formattedSelectors = rule.selectors.join(`,\n${selectorIndents}`);
 		rule.selector = formattedSelectors;
 		rule.raws.between = ' ';
-	} else if ((node as AtRule).params != undefined) {
+	}
+	else if ((node as AtRule).params != undefined) 
+	{
 		const atRule = node as AtRule;
 		atRule.params = atRule.params.trim();
 		atRule.raws.afterName = ' ';
 		atRule.raws.between = ' ';
 	}
 
-	for (let child of node.nodes) {
+	for (const child of node.nodes) 
+	{
 		child.raws.before = '\n' + innerIndent;
 		child.raws.after = '\n' + innerIndent;
 		fixRuleIndentation(child as Rule, nesting + 1);
@@ -78,112 +88,146 @@ function fixRuleIndentation(node: Rule | AtRule, nesting = 1) {
  * @param rule
  * @param result
  */
-function adjustRuleRaws(rule: Node, result: Result) {
+function adjustRuleRaws(rule: Node, result: Result) 
+{
 	rule.raws.before = `\n/* From ${result.opts.from} */\n`;
 	rule.raws.between = ' ';
 	rule.raws.after = '\n';
 }
 
-export default (config: LayerParserConfig): LayerListObject => {
-	// Store the sum of components and utilities from every document in the directory
-	let componentList: Node[] = [];
-	let utilityList: Node[] = [];
-	let missedRules: Node[] = [];
-	// Used for not adding the same rule twice
-	let processedRules: Set<string> = new Set();
-	let cssParser: Plugin = {
-		postcssPlugin: 'CssLayerGrouper',
-		//@ts-ignore
-		prepare: getParser(),
-	};
-
-	/** Function that returns the PostCSS plugin object.
-	 * Parses css file and retrieves the first nested rules in
-	 * @layer utilities and @layer components as well as non-nested rules.
-	 */
-	function getParser() {
-		return (opts = {}) => {
-			return {
-				Rule(rule: Rule, { result }) {
-					// Only add rules that have not been added yet
-					if (!processedRules.has(rule.selector)) {
-						if (rule.parent?.type == 'root') {
-							if (config.addClassesWithoutLayerAsUtilities == undefined) {
-								missedRules.push(rule);
-								return;
-							}
-							// This rule is not in a layer, so add it as a utility by default
-							fixRuleIndentation(rule);
-							adjustRuleRaws(rule, result as Result);
-							if (config.addClassesWithoutLayerAsUtilities == true) {
-								utilityList.push(rule);
-							} else if (config.addClassesWithoutLayerAsUtilities == false) {
-								componentList.push(rule);
-							}
-						} else if (rule.parent?.type == 'atrule') {
-							const atRuleParent: AtRule = rule.parent as AtRule;
-							// This rule is in an @Rule, check whether it's component or utility layer
-							if (atRuleParent.params == 'components') {
-								fixRuleIndentation(rule);
-								adjustRuleRaws(rule, result as Result);
-								componentList.push(rule);
-							} else if (atRuleParent.params == 'utilities') {
-								fixRuleIndentation(rule);
-								adjustRuleRaws(rule, result as Result);
-								utilityList.push(rule);
-							}
-						}
-						processedRules.add(rule.selector);
-					}
-				},
-			};
-		};
+function hasNotProcessedRule(rule: Rule) 
+	{
+		if (processedRules.has(rule.selector)) 
+		{
+			duplicateRules.push(rule);
+			return false;
+		}
+		else 
+		{
+			processedRules.add(rule.selector);
+			return true;
+		}
 	}
 
-	if (config.directory == undefined) {
+/** Function that returns the PostCSS plugin object.
+ * Parses css file and retrieves the first nested rules in
+ * @layer utilities and @layer components as well as non-nested rules.
+ */
+function getParser(config: LayerParserConfig): (opts: any) => any
+{
+	return () => 
+	{
+		return {
+			Rule(rule: Rule, { result }) 
+			{
+				// Check if the rule is a base-level selector in css file.
+				if (rule.parent?.type == 'root') 
+				{
+					// Check if any other file has processed this rule
+					if (hasNotProcessedRule(rule)) 
+					{
+						if (config.addClassesWithoutLayerAsUtilities == undefined) 
+						{
+							missedRules.push(rule);
+							return;
+						}
+
+						fixRuleIndentation(rule);
+						adjustRuleRaws(rule, result as Result);
+						if (config.addClassesWithoutLayerAsUtilities == true) 
+						{
+							utilityList.push(rule);
+						}
+						else if (config.addClassesWithoutLayerAsUtilities == false) 
+						{
+							componentList.push(rule);
+						}
+					}
+				}
+				// Check if the at rule exists in a layer
+				else if (rule.parent?.type == 'atrule') 
+				{
+					if (hasNotProcessedRule(rule))
+					{
+						const atRuleParent: AtRule = rule.parent as AtRule;
+						// This rule is in an @Rule, check whether it's component or utility layer
+						if (atRuleParent.params == 'components') 
+						{
+							fixRuleIndentation(rule);
+							adjustRuleRaws(rule, result as Result);
+							componentList.push(rule);
+						}
+						else if (atRuleParent.params == 'utilities') 
+						{
+							fixRuleIndentation(rule);
+							adjustRuleRaws(rule, result as Result);
+							utilityList.push(rule);
+						}
+					}
+				}
+			},
+		};
+	};
+}
+
+export default (config: LayerParserConfig): LayerListObject => 
+{
+
+	if (config.directory == undefined) 
+	{
 		warn('There was no directory provided. Defaulting to process.cwd().');
 		config.directory = process.cwd();
 	}
-
+	
 	// Resolve the directory provided by the user
-	let resolvedDirectory = resolve(config.directory);
-
+	const resolvedDirectory = resolve(config.directory);
+	
 	let result: string[] = [];
-	config.globPatterns ??= [`**/*.css`];
+	config.globPatterns ??= ['**/*.css'];
 	result = globSync(config.globPatterns, {
 		cwd: resolvedDirectory,
 	});
-
-	if (config.debug) {
+	
+	if (config.debug) 
+	{
 		log(`Searched directory: ${resolvedDirectory}`);
 		log(`Found: ${result.join('\t')}`);
 	}
+	
+	// Initialize the custom parser
+	const cssParser: Plugin = {
+		postcssPlugin: 'CssLayerGrouper',
+		prepare: getParser(config),
+	};
 
-	let invalidFiles = [];
-	for (let fileName of result) {
-		if (!fileName.endsWith('.css')) {
+	const invalidFiles = [];
+	const processor = postcss([cssParser]);
+	for (const fileName of result) 
+	{
+		if (!fileName.endsWith('.css')) 
+		{
 			invalidFiles.push(fileName);
 			continue;
 		}
-		let fullPath = resolve(resolvedDirectory, fileName);
-		let file = readFileSync(fullPath, 'utf8');
-		postcss([cssParser])
-			.process(file, { from: fileName })
-			.then((result) => {});
+		const fullPath = resolve(resolvedDirectory, fileName);
+		const file = readFileSync(fullPath, 'utf8');
+		processor.process(file, { from: fileName }).then((result) => {});
 	}
 
-	if (invalidFiles.length > 0) {
-		error(
-			`Globbing resulted in files that did not end in .css:\n\t${invalidFiles.join(
-				'\n\t'
-			)}`
-		);
+	if (invalidFiles.length > 0) 
+	{
+		error(`Globbing resulted in files that did not end in .css:\n\t${invalidFiles.join(	'\n\t')}`);
 	}
 
-	if (missedRules.length > 0) {
-		warn(
-			`The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`
-		);
+	if (missedRules.length > 0) 
+	{
+		warn(`The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`);
+	}
+
+	if (duplicateRules.length > 0) 
+	{
+		const duplicateSelectors = duplicateRules.map((rule) => (rule as Rule).selector);
+		warn(`There were duplicate rules found:\n\t${duplicateSelectors.join('\n\t')}`);
 	}
 
 	return {
