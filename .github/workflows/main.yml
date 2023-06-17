@@ -33,6 +33,7 @@ jobs:
                   author_name: Github Build Action
                   message: 'Commit CI build'
                   add: '*'
+                  push: 'main'
                   tag_push: '--force'
                   fetch: false
                   github_token: ${{ secrets.GITHUB_TOKEN }}
