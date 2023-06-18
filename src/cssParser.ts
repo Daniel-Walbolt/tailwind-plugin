@@ -1,7 +1,7 @@
-import { existsSync, readFileSync } from 'fs';
-import { join, resolve } from 'path';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import postcss, { AtRule, Node, Plugin, Result, Rule } from 'postcss';
-import { LayerParserConfig, LayerListObject, LayerLocation } from './types';
+import { LayerParserConfig, LayerListObject } from './types';
 import { globSync } from 'glob';
 
 const consoleDisplayName = '[layer-parser]:';
@@ -142,7 +142,7 @@ function getParser(config: LayerParserConfig): (opts: any) => any
 					// Check if any other file has processed this rule
 					if (hasNotProcessedRule(rule)) 
 					{
-						if (config.unlayeredClassBehavior == undefined) 
+						if (config.unlayeredClassBehavior == "Ignore") 
 						{
 							missedRules.push(rule);
 							return;
@@ -188,8 +188,7 @@ function getParser(config: LayerParserConfig): (opts: any) => any
 
 export default (config: LayerParserConfig): LayerListObject => 
 {
-
-	if (config.globPatterns.length > 0) {
+	if (config.globPatterns != undefined && config.globPatterns.length > 0) {
 		for (let pattern of config.globPatterns) {
 			if (pattern.startsWith('/**')) {
 				error(`User attempted to glob their entire computer using: ${pattern}. This would result in a serious performance problem, and thus parsing has been skipped.`);
@@ -268,9 +267,9 @@ export default (config: LayerParserConfig): LayerListObject =>
 
 	if (missedRules.length > 0) 
 	{
-		let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed:`;
+		let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} unlayed css rules not parsed:`;
 		if (config.debug) {
-			warnMessage += `\n${missedRules.map(rule => (rule as Rule).selector).join('\n\t')}`;
+			warnMessage += `\n\t${missedRules.map(rule => (rule as Rule).selector).join(',\n\t')}`;
 		}
 		warn(warnMessage);
 	}

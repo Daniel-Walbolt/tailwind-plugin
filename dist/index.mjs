@@ -75,7 +75,7 @@ function getParser(config) {
         var _a, _b;
         if (((_a = rule.parent) == null ? void 0 : _a.type) == "root") {
           if (hasNotProcessedRule(rule)) {
-            if (config.unlayeredClassBehavior == void 0) {
+            if (config.unlayeredClassBehavior == "Ignore") {
               missedRules.push(rule);
               return;
             }
@@ -107,7 +107,7 @@ function getParser(config) {
 }
 var cssParser_default = (config) => {
   var _a, _b, _c, _d, _e;
-  if (config.globPatterns.length > 0) {
+  if (config.globPatterns != void 0 && config.globPatterns.length > 0) {
     for (let pattern of config.globPatterns) {
       if (pattern.startsWith("/**")) {
         error(`User attempted to glob their entire computer using: ${pattern}. This would result in a serious performance problem, and thus parsing has been skipped.`);
@@ -168,16 +168,16 @@ var cssParser_default = (config) => {
     parseFile(fileName, fullPath);
   }
   if (invalidFiles.length > 0) {
-    error(`Globbing resulted in files that did not end in .css:
+    warn(`Globbing resulted in files that did not end in .css:
 	${invalidFiles.join("\n	")}`);
   }
   if (missedRules.length > 0) {
-    let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`;
+    let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} unlayed css rules not parsed:`;
     if (config.debug) {
       warnMessage += `
-${missedRules.map((rule) => rule.selector).join("\n	")}`;
+	${missedRules.map((rule) => rule.selector).join(",\n	")}`;
     }
-    warn(`The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`);
+    warn(warnMessage);
   }
   if (duplicateRules.length > 0) {
     const duplicateSelectors = duplicateRules.map((rule) => rule.selector);
