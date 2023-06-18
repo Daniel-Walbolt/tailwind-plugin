@@ -140,7 +140,7 @@ There is an additonal export from the plugin: ```cssParser```. This is the under
 > ```
 > ```Node``` type comes from the ```PostCSS``` package.
 
-For those who have their ```tailwind.config.js``` in a separate directory tree than the target css, trying something like this to find it:
+For those who have their ```tailwind.config.js``` in a separate directory tree than the target css, trying something like this for your ```directory``` to find it:
 ```js
-${__dirname}/../css
+`${__dirname}/../css`
 ```
