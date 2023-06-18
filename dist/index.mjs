@@ -107,6 +107,17 @@ function getParser(config) {
 }
 var cssParser_default = (config) => {
   var _a, _b, _c, _d, _e;
+  if (config.globPatterns.length > 0) {
+    for (let pattern of config.globPatterns) {
+      if (pattern.startsWith("/**")) {
+        error(`User attempted to glob their entire computer using: ${pattern}. This would result in a serious performance problem, and thus parsing has been skipped.`);
+        return {
+          components: [],
+          utilities: []
+        };
+      }
+    }
+  }
   (_a = config.commentType) != null ? _a : config.commentType = "File";
   (_b = config.openBracketNewLine) != null ? _b : config.openBracketNewLine = false;
   (_c = config.debug) != null ? _c : config.debug = false;

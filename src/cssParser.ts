@@ -263,16 +263,16 @@ export default (config: LayerParserConfig): LayerListObject =>
 
 	if (invalidFiles.length > 0) 
 	{
-		error(`Globbing resulted in files that did not end in .css:\n\t${invalidFiles.join(	'\n\t')}`);
+		warn(`Globbing resulted in files that did not end in .css:\n\t${invalidFiles.join('\n\t')}`);
 	}
 
 	if (missedRules.length > 0) 
 	{
-		let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`;
+		let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed:`;
 		if (config.debug) {
-			warnMessage += `\n${missedRules.map(rule => (rule as Rule).selector).join("\n\t")}`;
+			warnMessage += `\n${missedRules.map(rule => (rule as Rule).selector).join('\n\t')}`;
 		}
-		warn(`The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`);
+		warn(warnMessage);
 	}
 
 	if (duplicateRules.length > 0) 
