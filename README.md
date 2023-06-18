@@ -1,16 +1,22 @@
 # Tailwind Layer Parser
 
+[Installation](#installation)
+[Usage](#usage)
+[Configuration](#configuration)
+[Extras](#extras)
+
 ---
 
-**Layer Parser** lets you autocomplete and preview **custom css** that can be organized into directories and files while using the tailwind ecosystem.
+**Layer Parser** lets you autocomplete and preview **custom css** while utilizing the benefits of TailwindCSS.
 
-This is extremely useful for mono-repos using similar design across several apps, and want to use a more familiar CSS language rather than specifying classes through tailwind's native JSON syntax.
+This is extremely useful for mono-repos using similar styling across several projects. Your custom CSS can be organized in dedicated files to use a more familiar CSS language rather than specifying classes through tailwind's native JSON syntax.
 
 ---
 
 ## Installation
 
-_Note: This is a plugin for TailwindCSS, and should be used in a TailwindCSS environment._
+> **Warning**
+> This is a plugin for TailwindCSS, and can only be used in a project using TailwindCSS.
 
 ```sh
 npm i tailwind-layer-parser
@@ -26,4 +32,115 @@ pnpm add tailwind-layer-parser
 
 ## Usage
 
-Undocumented
+> **Note**
+> Only tested on VS Code, in a vite compiled vue project. However I don't see why it wouldn't work in other Tailwind environments.
+
+1. First have CSS files you want to see with Tailwind intellisense.
+```css
+.custom-class {
+    font-size: large;
+    &.inner-class {
+        font-weight: bold;
+    } 
+    &.inner-inner-class {
+        color: red;
+    }
+}
+```
+1. Adjust your plugin list in your ```tailwind.config.js```
+
+```js
+
+const plugin = require("tailwindcss/plugin");
+const { ParseCSSDirectoryPlugin } = require("tailwind-layer-parser"); // Import the helper function
+
+/** @type {import('tailwindcss').Config} \*/
+module.exports = {
+    content: ["./index.html", "./src/**/\*.{js,ts,vue}"],
+    theme: {
+        extend: {},
+    },
+    plugins: [
+        plugin(
+            ParseCSSDirectoryPlugin({
+                directory: `${__dirname}/css`
+            });
+        ),
+    ],
+};
+```
+3. If you have configured your target directory properly, your classes should now show up in your intellisense.
+<div style="text-align:center"><img src="./assets/IntellisenseCommentPreview.png" /></div>
+
+## Configuration
+For those wanting to customize your experience...
+> **Note**
+> Typings for the configuration can be explored in your code editor as well.
+
+> **Warning**
+> Adjustments to CSS rules are for intellisense preview only, and do not modify the CSS in files.
+
+> **Properties**
+> ```ts
+> directory: string
+> ``` 
+> The path to the directory of css files you want to parse.
+> 
+> ---
+> ```ts
+> addClassesWithoutLayerAsUtilities: boolean
+> ```
+> Determines what to do with classes that aren't located in @layer components {} or @layer utilities {}
+> Defaults to true.
+>
+> ---
+> ```ts
+> globPatterns: string[]
+> ```
+> Customize the glob patterns used to match css files in the provided directory. Internally, the [glob](https://www.npmjs.com/package/glob) package is used; use their docs for reference on proper glob patterns.
+> Defaults to match all immediate and nested .css files ("/**/*.css")
+>
+> ---
+> ```ts
+> debug: boolean
+> ```
+> Determines whether or not to report what files were found by the glob pattern.
+> Currently, there are print outs for the folowing:
+> - ALWAYS - A list of duplicate rules found across the files
+> - ALWAYS - Count of the rules that were not added because configuration did not permit it.
+> - DEBUG - List of the rules that were not added because configuration did not permit it.
+> - ALWAYS - A list of file names that matched the glob patterns but did not end with ".css"
+>
+> Plugin output is located in the output terminal, under "Tailwind CSS Intellisense"
+> <div style="text-align:center"><img src="./assets/TailwindOutputTerminal.png" /></div>
+>
+> ---
+> ```ts
+> commentType: "File" | "Absolute" | "None"
+> ```
+>  Specify the comment you want above each of the previewed CSS rules. "File" shows only the rule's containing file's name. "Absolute" shows the exact path of the containing file. "None" removes the comment from the preview.
+>
+> ---
+> ```ts
+> openBracketNewLine: boolean
+> ```
+> Basically Allman style for CSS rules when set to true.
+> <div style="text-align:center"><img src="./assets/IntellisenseAllmanStylePreview.png" /></div>
+
+## Extras
+There is an additonal export from the plugin: ```cssParser```. This is the underlying processor for globbing, parsing, modifying, and preparing the desired CSS. This export allows the adventurous developers to make their own tailwind plugin and do their own processing AFTER this plugin.
+
+> **Note**
+> The result of ```cssParser``` is an object. You can also view this type in your code editor.
+> ```ts
+> {
+>   utilities: Node[],
+>   components: Node[]
+> }
+> ```
+> ```Node``` type comes from the ```PostCSS``` package.
+
+For those who have their ```tailwind.config.js``` in a separate directory tree than the target css, trying something like this to find it:
+```js
+${__dirname}/../css
+```

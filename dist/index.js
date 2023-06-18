@@ -54,7 +54,7 @@ function warn(warning) {
 function error(error2) {
   console.error(`${consoleDisplayName} ${error2}`);
 }
-function fixRuleIndentation(node, nesting = 1) {
+function fixRuleIndentation(node, config, nesting = 1) {
   if (node.nodes == void 0 || node.nodes.length == 0) {
     return;
   }
@@ -66,29 +66,33 @@ function fixRuleIndentation(node, nesting = 1) {
       selectorIndents += "	";
     }
   }
+  let desiredBetween = config.openBracketNewLine ? `
+${selectorIndents}` : " ";
   if (node.selectors != void 0) {
     const rule = node;
     const formattedSelectors = rule.selectors.join(`,
 ${selectorIndents}`);
     rule.selector = formattedSelectors;
-    rule.raws.between = " ";
+    rule.raws.between = desiredBetween;
   } else if (node.params != void 0) {
     const atRule = node;
     atRule.params = atRule.params.trim();
     atRule.raws.afterName = " ";
-    atRule.raws.between = " ";
+    atRule.raws.between = desiredBetween;
   }
   for (const child of node.nodes) {
     child.raws.before = "\n" + innerIndent;
     child.raws.after = "\n" + innerIndent;
-    fixRuleIndentation(child, nesting + 1);
+    fixRuleIndentation(child, config, nesting + 1);
   }
+  return selectorIndents;
 }
-function adjustRuleRaws(rule, result) {
-  rule.raws.before = `
-/* From ${result.opts.from} */
+function adjustRuleRaws(rule, result, config, selectorIndent) {
+  rule.raws.before = "\n";
+  if (config.commentType !== "None") {
+    rule.raws.before += `/* From ${result.opts.from} */
 `;
-  rule.raws.between = " ";
+  }
   rule.raws.after = "\n";
 }
 function hasNotProcessedRule(rule) {
@@ -111,8 +115,8 @@ function getParser(config) {
               missedRules.push(rule);
               return;
             }
-            fixRuleIndentation(rule);
-            adjustRuleRaws(rule, result);
+            let selectorIndent = fixRuleIndentation(rule, config);
+            adjustRuleRaws(rule, result, config, selectorIndent);
             if (config.addClassesWithoutLayerAsUtilities == true) {
               utilityList.push(rule);
             } else if (config.addClassesWithoutLayerAsUtilities == false) {
@@ -123,12 +127,12 @@ function getParser(config) {
           if (hasNotProcessedRule(rule)) {
             const atRuleParent = rule.parent;
             if (atRuleParent.params == "components") {
-              fixRuleIndentation(rule);
-              adjustRuleRaws(rule, result);
+              let selectorIndent = fixRuleIndentation(rule, config);
+              adjustRuleRaws(rule, result, config, selectorIndent);
               componentList.push(rule);
             } else if (atRuleParent.params == "utilities") {
-              fixRuleIndentation(rule);
-              adjustRuleRaws(rule, result);
+              let selectorIndent = fixRuleIndentation(rule, config);
+              adjustRuleRaws(rule, result, config, selectorIndent);
               utilityList.push(rule);
             }
           }
@@ -138,19 +142,21 @@ function getParser(config) {
   };
 }
 var cssParser_default = (config) => {
-  var _a;
+  var _a, _b, _c;
+  (_a = config.commentType) != null ? _a : config.commentType = "File";
+  (_b = config.openBracketNewLine) != null ? _b : config.openBracketNewLine = true;
   if (config.directory == void 0) {
     warn("There was no directory provided. Defaulting to process.cwd().");
     config.directory = process.cwd();
   }
   const resolvedDirectory = (0, import_path.resolve)(config.directory);
   let result = [];
-  (_a = config.globPatterns) != null ? _a : config.globPatterns = ["**/*.css"];
+  (_c = config.globPatterns) != null ? _c : config.globPatterns = ["**/*.css"];
   result = (0, import_glob.globSync)(config.globPatterns, {
     cwd: resolvedDirectory
   });
+  log(`Searched directory: ${resolvedDirectory}`);
   if (config.debug) {
-    log(`Searched directory: ${resolvedDirectory}`);
     log(`Found: ${result.join("	")}`);
   }
   const cssParser = {
@@ -159,21 +165,41 @@ var cssParser_default = (config) => {
   };
   const invalidFiles = [];
   const processor = (0, import_postcss.default)([cssParser]);
+  let parseFile;
+  switch (config.commentType) {
+    case "Absolute":
+      parseFile = (fileName, fullPath) => {
+        const file = (0, import_fs.readFileSync)(fullPath, "utf8");
+        processor.process(file, { from: fullPath, to: fullPath }).then((result2) => {
+        });
+      };
+      break;
+    default:
+      parseFile = (fileName, fullPath) => {
+        const file = (0, import_fs.readFileSync)(fullPath, "utf8");
+        processor.process(file, { from: fileName, to: fileName }).then((result2) => {
+        });
+      };
+      break;
+  }
   for (const fileName of result) {
     if (!fileName.endsWith(".css")) {
       invalidFiles.push(fileName);
       continue;
     }
     const fullPath = (0, import_path.resolve)(resolvedDirectory, fileName);
-    const file = (0, import_fs.readFileSync)(fullPath, "utf8");
-    processor.process(file, { from: fileName }).then((result2) => {
-    });
+    parseFile(fileName, fullPath);
   }
   if (invalidFiles.length > 0) {
     error(`Globbing resulted in files that did not end in .css:
 	${invalidFiles.join("\n	")}`);
   }
   if (missedRules.length > 0) {
+    let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`;
+    if (config.debug) {
+      warnMessage += `
+${missedRules.map((rule) => rule.selector).join("\n	")}`;
+    }
     warn(`The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`);
   }
   if (duplicateRules.length > 0) {
@@ -188,9 +214,11 @@ var cssParser_default = (config) => {
 };
 
 // src/index.ts
-function ParseCSSDirectoryPlugin(directoryPath) {
+function ParseCSSDirectoryPlugin(config) {
+  var _a;
+  (_a = config.addClassesWithoutLayerAsUtilities) != null ? _a : config.addClassesWithoutLayerAsUtilities = true;
   return ({ addUtilities, addComponents }) => {
-    const classes = cssParser_default({ directory: directoryPath, addClassesWithoutLayerAsUtilities: true });
+    const classes = cssParser_default(config);
     for (const utility of classes.utilities) {
       addUtilities(utility);
     }

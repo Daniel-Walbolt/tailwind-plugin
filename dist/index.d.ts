@@ -4,6 +4,7 @@ type LayerListObject = {
     utilities: Node[];
     components: Node[];
 };
+type LayerLocation = "File" | "Absolute" | "None";
 type LayerParserConfig = {
     /**
      * The path of the directory that you want to be added.
@@ -32,6 +33,18 @@ type LayerParserConfig = {
      * Enable debug mode on this plugin so that you can see the file paths that are globbed.
      */
     debug?: boolean;
+    /**
+     * Determines the specificity of the comment above each rule.
+     *
+     * Helps to identify where the css styling comes from.
+     *
+     * Defaults to "File."
+     */
+    commentType?: LayerLocation;
+    /**
+     * Should the opening bracket for styles appear on the next line?
+     */
+    openBracketNewLine: boolean;
 };
 
 declare const _default: (config: LayerParserConfig) => LayerListObject;
@@ -41,9 +54,9 @@ declare const _default: (config: LayerParserConfig) => LayerListObject;
  *
  * Uses the default configuration.
  */
-declare function ParseCSSDirectoryPlugin(directoryPath?: string): ({ addUtilities, addComponents }: {
+declare function ParseCSSDirectoryPlugin(config: LayerParserConfig): ({ addUtilities, addComponents }: {
     addUtilities: any;
     addComponents: any;
 }) => void;
 
-export { LayerListObject, LayerParserConfig, ParseCSSDirectoryPlugin, _default as cssParser };
+export { LayerListObject, LayerLocation, LayerParserConfig, ParseCSSDirectoryPlugin, _default as cssParser };

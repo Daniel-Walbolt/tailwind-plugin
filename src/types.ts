@@ -5,6 +5,8 @@ export type LayerListObject = {
 	components: Node[];
 };
 
+export type LayerLocation = "File" | "Absolute" | "None";
+
 export type LayerParserConfig = {
 	/**
 	 * The path of the directory that you want to be added.
@@ -36,4 +38,18 @@ export type LayerParserConfig = {
 	 * Enable debug mode on this plugin so that you can see the file paths that are globbed.
 	 */
 	debug?: boolean;
+
+	/**
+	 * Determines the specificity of the comment above each rule.
+	 * 
+	 * Helps to identify where the css styling comes from.
+	 * 
+	 * Defaults to "File."
+	 */
+	commentType?: LayerLocation;
+
+	/**
+	 * Should the opening bracket for styles appear on the next line?
+	 */
+	openBracketNewLine: boolean;
 };

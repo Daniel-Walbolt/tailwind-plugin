@@ -12,7 +12,8 @@
     "release": "npm run lint && npm run build && npm publish"
   },
   "files": [
-    "dist"
+    "dist",
+    "assets"
   ],
   "keywords": [
     "Tailwind",
@@ -44,13 +45,13 @@
     "eslint-plugin-vue": "^9.14.1",
     "path": "^0.12.7",
     "tsup": "^6.7.0",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "prettier": "^2.8.8",
+    "vue-eslint-parser": "^9.3.1"
   },
   "dependencies": {
     "glob": "^10.2.7",
     "path": "^0.12.7",
-    "postcss": "^8.4.24",
-    "prettier": "^2.8.8",
-    "vue-eslint-parser": "^9.3.1"
+    "postcss": "^8.4.24"
   }
 }

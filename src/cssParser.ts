@@ -1,7 +1,7 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { join, resolve } from 'path';
 import postcss, { AtRule, Node, Plugin, Result, Rule } from 'postcss';
-import { LayerParserConfig, LayerListObject } from './types';
+import { LayerParserConfig, LayerListObject, LayerLocation } from './types';
 import { globSync } from 'glob';
 
 const consoleDisplayName = '[layer-parser]:';
@@ -38,7 +38,7 @@ function error(error: string)
  * @param nesting
  * @returns
  */
-function fixRuleIndentation(node: Rule | AtRule, nesting = 1) 
+function fixRuleIndentation(node: Rule | AtRule, config: LayerParserConfig, nesting = 1) 
 {
 	if (node.nodes == undefined || node.nodes.length == 0) 
 	{
@@ -58,27 +58,30 @@ function fixRuleIndentation(node: Rule | AtRule, nesting = 1)
 		}
 	}
 
+	let desiredBetween = config.openBracketNewLine ? `\n${selectorIndents}` : ' ';
+
 	if ((node as Rule).selectors != undefined) 
 	{
 		const rule = node as Rule;
 		const formattedSelectors = rule.selectors.join(`,\n${selectorIndents}`);
 		rule.selector = formattedSelectors;
-		rule.raws.between = ' ';
+		rule.raws.between = desiredBetween;
 	}
 	else if ((node as AtRule).params != undefined) 
 	{
 		const atRule = node as AtRule;
 		atRule.params = atRule.params.trim();
 		atRule.raws.afterName = ' ';
-		atRule.raws.between = ' ';
+		atRule.raws.between = desiredBetween;
 	}
 
 	for (const child of node.nodes) 
 	{
 		child.raws.before = '\n' + innerIndent;
 		child.raws.after = '\n' + innerIndent;
-		fixRuleIndentation(child as Rule, nesting + 1);
+		fixRuleIndentation(child as Rule, config, nesting + 1);
 	}
+	return selectorIndents;
 }
 
 /**
@@ -88,30 +91,43 @@ function fixRuleIndentation(node: Rule | AtRule, nesting = 1)
  * @param rule
  * @param result
  */
-function adjustRuleRaws(rule: Node, result: Result) 
+function adjustRuleRaws(rule: Node, result: Result, config: LayerParserConfig, selectorIndent: string) 
 {
-	rule.raws.before = `\n/* From ${result.opts.from} */\n`;
-	rule.raws.between = ' ';
+	rule.raws.before = '\n';
+	if  (config.commentType !== "None")
+	{
+		rule.raws.before += `/* From ${result.opts.from} */\n`;
+	}
 	rule.raws.after = '\n';
 }
 
+/**
+ * Check if the target rule has been processed by some instance of the parser.
+ * 
+ * If the rule has not been processed, marks it as processed.
+ * 
+ * Also identifies rules that have matching selectors, rather than just the rule itself.
+ * @param rule
+ * @returns 
+ */
 function hasNotProcessedRule(rule: Rule) 
+{
+	if (processedRules.has(rule.selector)) 
 	{
-		if (processedRules.has(rule.selector)) 
-		{
-			duplicateRules.push(rule);
-			return false;
-		}
-		else 
-		{
-			processedRules.add(rule.selector);
-			return true;
-		}
+		duplicateRules.push(rule);
+		return false;
 	}
+	else 
+	{
+		processedRules.add(rule.selector);
+		return true;
+	}
+}
 
-/** Function that returns the PostCSS plugin object.
- * Parses css file and retrieves the first nested rules in
- * @layer utilities and @layer components as well as non-nested rules.
+/** 
+ * Function that returns the PostCSS plugin object.
+ * Parses css file and performs validation and adjustments on rules.
+ * Adds processed rules to arrays.
  */
 function getParser(config: LayerParserConfig): (opts: any) => any
 {
@@ -132,8 +148,8 @@ function getParser(config: LayerParserConfig): (opts: any) => any
 							return;
 						}
 
-						fixRuleIndentation(rule);
-						adjustRuleRaws(rule, result as Result);
+						let selectorIndent = fixRuleIndentation(rule, config);
+						adjustRuleRaws(rule, result as Result, config, selectorIndent);
 						if (config.addClassesWithoutLayerAsUtilities == true) 
 						{
 							utilityList.push(rule);
@@ -153,25 +169,28 @@ function getParser(config: LayerParserConfig): (opts: any) => any
 						// This rule is in an @Rule, check whether it's component or utility layer
 						if (atRuleParent.params == 'components') 
 						{
-							fixRuleIndentation(rule);
-							adjustRuleRaws(rule, result as Result);
+							let selectorIndent = fixRuleIndentation(rule, config);
+							adjustRuleRaws(rule, result as Result, config, selectorIndent);
 							componentList.push(rule);
 						}
 						else if (atRuleParent.params == 'utilities') 
 						{
-							fixRuleIndentation(rule);
-							adjustRuleRaws(rule, result as Result);
+							let selectorIndent = fixRuleIndentation(rule, config);
+							adjustRuleRaws(rule, result as Result, config, selectorIndent);
 							utilityList.push(rule);
 						}
 					}
 				}
-			},
+			}
 		};
 	};
 }
 
 export default (config: LayerParserConfig): LayerListObject => 
 {
+
+	config.commentType ??= "File";
+	config.openBracketNewLine ??= true;
 
 	if (config.directory == undefined) 
 	{
@@ -188,9 +207,9 @@ export default (config: LayerParserConfig): LayerListObject =>
 		cwd: resolvedDirectory,
 	});
 	
+	log(`Searched directory: ${resolvedDirectory}`);
 	if (config.debug) 
 	{
-		log(`Searched directory: ${resolvedDirectory}`);
 		log(`Found: ${result.join('\t')}`);
 	}
 	
@@ -202,6 +221,22 @@ export default (config: LayerParserConfig): LayerListObject =>
 
 	const invalidFiles = [];
 	const processor = postcss([cssParser]);
+	let parseFile: (fileName: string, fullPath: string) => void;
+	switch (config.commentType) {
+		case "Absolute":
+			parseFile = (fileName: string, fullPath: string) => {
+				const file = readFileSync(fullPath, 'utf8');
+				processor.process(file, { from: fullPath, to: fullPath }).then((result) => {});
+			}
+			break;
+		default:
+			parseFile = (fileName: string, fullPath: string) => {
+				const file = readFileSync(fullPath, 'utf8');
+				processor.process(file, { from: fileName, to: fileName }).then((result) => {});
+			}
+			break;
+	}
+
 	for (const fileName of result) 
 	{
 		if (!fileName.endsWith('.css')) 
@@ -210,8 +245,7 @@ export default (config: LayerParserConfig): LayerListObject =>
 			continue;
 		}
 		const fullPath = resolve(resolvedDirectory, fileName);
-		const file = readFileSync(fullPath, 'utf8');
-		processor.process(file, { from: fileName }).then((result) => {});
+		parseFile(fileName, fullPath);
 	}
 
 	if (invalidFiles.length > 0) 
@@ -221,6 +255,10 @@ export default (config: LayerParserConfig): LayerListObject =>
 
 	if (missedRules.length > 0) 
 	{
+		let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`;
+		if (config.debug) {
+			warnMessage += `\n${missedRules.map(rule => (rule as Rule).selector).join("\n\t")}`;
+		}
 		warn(`The target directory: ${config.directory} had ${missedRules.length} css rules that were not parsed.`);
 	}
 
