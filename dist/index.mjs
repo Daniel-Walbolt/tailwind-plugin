@@ -75,15 +75,15 @@ function getParser(config) {
         var _a, _b;
         if (((_a = rule.parent) == null ? void 0 : _a.type) == "root") {
           if (hasNotProcessedRule(rule)) {
-            if (config.addClassesWithoutLayerAsUtilities == void 0) {
+            if (config.unlayeredClassBehavior == void 0) {
               missedRules.push(rule);
               return;
             }
             let selectorIndent = fixRuleIndentation(rule, config);
             adjustRuleRaws(rule, result, config, selectorIndent);
-            if (config.addClassesWithoutLayerAsUtilities == true) {
+            if (config.unlayeredClassBehavior == "Utility") {
               utilityList.push(rule);
-            } else if (config.addClassesWithoutLayerAsUtilities == false) {
+            } else if (config.unlayeredClassBehavior == "Component") {
               componentList.push(rule);
             }
           }
@@ -106,16 +106,18 @@ function getParser(config) {
   };
 }
 var cssParser_default = (config) => {
-  var _a, _b, _c;
+  var _a, _b, _c, _d, _e;
   (_a = config.commentType) != null ? _a : config.commentType = "File";
-  (_b = config.openBracketNewLine) != null ? _b : config.openBracketNewLine = true;
+  (_b = config.openBracketNewLine) != null ? _b : config.openBracketNewLine = false;
+  (_c = config.debug) != null ? _c : config.debug = false;
+  (_d = config.unlayeredClassBehavior) != null ? _d : config.unlayeredClassBehavior = "Utility";
+  (_e = config.globPatterns) != null ? _e : config.globPatterns = ["**/*.css"];
   if (config.directory == void 0) {
     warn("There was no directory provided. Defaulting to process.cwd().");
     config.directory = process.cwd();
   }
   const resolvedDirectory = resolve(config.directory);
   let result = [];
-  (_c = config.globPatterns) != null ? _c : config.globPatterns = ["**/*.css"];
   result = globSync(config.globPatterns, {
     cwd: resolvedDirectory
   });
@@ -124,7 +126,7 @@ var cssParser_default = (config) => {
     log(`Found: ${result.join("	")}`);
   }
   const cssParser = {
-    postcssPlugin: "CssLayerGrouper",
+    postcssPlugin: "layer-parser",
     prepare: getParser(config)
   };
   const invalidFiles = [];
@@ -179,8 +181,6 @@ ${missedRules.map((rule) => rule.selector).join("\n	")}`;
 
 // src/index.ts
 function ParseCSSDirectoryPlugin(config) {
-  var _a;
-  (_a = config.addClassesWithoutLayerAsUtilities) != null ? _a : config.addClassesWithoutLayerAsUtilities = true;
   return ({ addUtilities, addComponents }) => {
     const classes = cssParser_default(config);
     for (const utility of classes.utilities) {

@@ -5,6 +5,7 @@ type LayerListObject = {
     components: Node[];
 };
 type LayerLocation = "File" | "Absolute" | "None";
+type UnlayeredClassBehavior = "Ignore" | "Component" | "Utility";
 type LayerParserConfig = {
     /**
      * The path of the directory that you want to be added.
@@ -16,11 +17,12 @@ type LayerParserConfig = {
     /**
      * Should this plugin parse classes that aren't in a component or utilities layer?
      *
-     * @param true Parse classes without a tailwind layer as utilities
-     * @param false Parse classes without a tailwind layer as components.
-     * @param undefined Do not add classes that do not belong to a tailwind layer.
+     * Defaults to Utility
+     * @param Ignore Parse classes without a tailwind layer as utilities
+     * @param Component Parse classes without a tailwind layer as components.
+     * @param Utility Do not add classes that do not belong to a tailwind layer.
      */
-    addClassesWithoutLayerAsUtilities?: boolean;
+    unlayeredClassBehavior?: UnlayeredClassBehavior;
     /**
      * Specify your own glob patterns to match css files.
      *
@@ -59,4 +61,4 @@ declare function ParseCSSDirectoryPlugin(config: LayerParserConfig): ({ addUtili
     addComponents: any;
 }) => void;
 
-export { LayerListObject, LayerLocation, LayerParserConfig, ParseCSSDirectoryPlugin, _default as cssParser };
+export { LayerListObject, LayerLocation, LayerParserConfig, ParseCSSDirectoryPlugin, UnlayeredClassBehavior, _default as cssParser };

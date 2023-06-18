@@ -10,8 +10,6 @@ import { watch } from 'fs';
  */
 function ParseCSSDirectoryPlugin(config: LayerParserConfig) 
 {
-	config.addClassesWithoutLayerAsUtilities ??= true;
-
 	return ({ addUtilities, addComponents }) => 
 	{
 		const classes = cssParser(config);

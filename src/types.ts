@@ -6,6 +6,7 @@ export type LayerListObject = {
 };
 
 export type LayerLocation = "File" | "Absolute" | "None";
+export type UnlayeredClassBehavior = "Ignore" | "Component" | "Utility";
 
 export type LayerParserConfig = {
 	/**
@@ -18,12 +19,13 @@ export type LayerParserConfig = {
 
 	/**
 	 * Should this plugin parse classes that aren't in a component or utilities layer?
-	 *
-	 * @param true Parse classes without a tailwind layer as utilities
-	 * @param false Parse classes without a tailwind layer as components.
-	 * @param undefined Do not add classes that do not belong to a tailwind layer.
+	 * 
+	 * Defaults to Utility
+	 * @param Ignore Parse classes without a tailwind layer as utilities
+	 * @param Component Parse classes without a tailwind layer as components.
+	 * @param Utility Do not add classes that do not belong to a tailwind layer.
 	 */
-	addClassesWithoutLayerAsUtilities?: boolean;
+	unlayeredClassBehavior?: UnlayeredClassBehavior;
 
 	/**
 	 * Specify your own glob patterns to match css files.

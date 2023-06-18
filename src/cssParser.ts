@@ -142,7 +142,7 @@ function getParser(config: LayerParserConfig): (opts: any) => any
 					// Check if any other file has processed this rule
 					if (hasNotProcessedRule(rule)) 
 					{
-						if (config.addClassesWithoutLayerAsUtilities == undefined) 
+						if (config.unlayeredClassBehavior == undefined) 
 						{
 							missedRules.push(rule);
 							return;
@@ -150,11 +150,11 @@ function getParser(config: LayerParserConfig): (opts: any) => any
 
 						let selectorIndent = fixRuleIndentation(rule, config);
 						adjustRuleRaws(rule, result as Result, config, selectorIndent);
-						if (config.addClassesWithoutLayerAsUtilities == true) 
+						if (config.unlayeredClassBehavior == "Utility") 
 						{
 							utilityList.push(rule);
 						}
-						else if (config.addClassesWithoutLayerAsUtilities == false) 
+						else if (config.unlayeredClassBehavior == "Component") 
 						{
 							componentList.push(rule);
 						}
@@ -189,8 +189,22 @@ function getParser(config: LayerParserConfig): (opts: any) => any
 export default (config: LayerParserConfig): LayerListObject => 
 {
 
+	if (config.globPatterns.length > 0) {
+		for (let pattern of config.globPatterns) {
+			if (pattern.startsWith('/**')) {
+				error(`User attempted to glob their entire computer using: ${pattern}. This would result in a serious performance problem, and thus parsing has been skipped.`);
+				return {
+					components: [],
+					utilities: []
+				}
+			}
+		}
+	}
 	config.commentType ??= "File";
-	config.openBracketNewLine ??= true;
+	config.openBracketNewLine ??= false;
+	config.debug ??= false;
+	config.unlayeredClassBehavior ??= "Utility";
+	config.globPatterns ??= ['**/*.css'];
 
 	if (config.directory == undefined) 
 	{
@@ -202,7 +216,6 @@ export default (config: LayerParserConfig): LayerListObject =>
 	const resolvedDirectory = resolve(config.directory);
 	
 	let result: string[] = [];
-	config.globPatterns ??= ['**/*.css'];
 	result = globSync(config.globPatterns, {
 		cwd: resolvedDirectory,
 	});
@@ -215,7 +228,7 @@ export default (config: LayerParserConfig): LayerListObject =>
 	
 	// Initialize the custom parser
 	const cssParser: Plugin = {
-		postcssPlugin: 'CssLayerGrouper',
+		postcssPlugin: 'layer-parser',
 		prepare: getParser(config),
 	};
 

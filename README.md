@@ -88,7 +88,7 @@ For those wanting to customize your experience...
 > 
 > ---
 > ```ts
-> addClassesWithoutLayerAsUtilities: boolean
+> unlayeredClassBehavior: "Ignore" | "Component" | "Utility"
 > ```
 > Determines what to do with classes that aren't located in @layer components {} or @layer utilities {}
 > Defaults to true.
@@ -104,6 +104,7 @@ For those wanting to customize your experience...
 > ```ts
 > debug: boolean
 > ```
+> Defaults to false
 > Determines whether or not to report what files were found by the glob pattern.
 > Currently, there are print outs for the folowing:
 > - ALWAYS - A list of duplicate rules found across the files
@@ -124,6 +125,7 @@ For those wanting to customize your experience...
 > ```ts
 > openBracketNewLine: boolean
 > ```
+> Defaults to false.
 > Basically Allman style for CSS rules when set to true.
 > <div style="text-align:center"><img src="./assets/IntellisenseAllmanStylePreview.png" /></div>
 
