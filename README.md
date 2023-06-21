@@ -47,7 +47,7 @@ pnpm add tailwind-layer-parser
     }
 }
 ```
-1. Adjust your plugin list in your ```tailwind.config.js```
+2. Adjust your plugin list in your ```tailwind.config.js```
 
 ```js
 
@@ -91,6 +91,7 @@ For those wanting to customize your experience...
 > unlayeredClassBehavior: "Ignore" | "Component" | "Utility"
 > ```
 > Determines what to do with classes that aren't located in @layer components {} or @layer utilities {}
+> 
 > Defaults to true.
 >
 > ---
@@ -98,18 +99,21 @@ For those wanting to customize your experience...
 > globPatterns: string[]
 > ```
 > Customize the glob patterns used to match css files in the provided directory. Internally, the [glob](https://www.npmjs.com/package/glob) package is used; use their docs for reference on proper glob patterns.
-> Defaults to match all immediate and nested .css files ("/**/*.css")
+> 
+> Defaults to match all immediate and nested .css files ("**/*.css")
 >
 > ---
 > ```ts
 > debug: boolean
 > ```
-> Defaults to false
+> Defaults to false.
+> 
 > Determines whether or not to report what files were found by the glob pattern.
 > Currently, there are print outs for the folowing:
-> - ALWAYS - A list of duplicate rules found across the files
-> - ALWAYS - Count of the rules that were not added because configuration did not permit it.
-> - DEBUG - List of the rules that were not added because configuration did not permit it.
+> - ALWAYS - Count of the rules that were not added because unlayeredBehavior ignored them.
+> - DEBUG - A list of the rules that were not added because unlayeredBehavior ignored them.
+> - ALWAYS - Count of the duplicate selectors found in target directory
+> - DEBUG - A list of duplicate selectors found in the target directory
 > - ALWAYS - A list of file names that matched the glob patterns but did not end with ".css"
 >
 > Plugin output is located in the output terminal, under "Tailwind CSS Intellisense"
@@ -121,11 +125,14 @@ For those wanting to customize your experience...
 > ```
 >  Specify the comment you want above each of the previewed CSS rules. "File" shows only the rule's containing file's name. "Absolute" shows the exact path of the containing file. "None" removes the comment from the preview.
 >
+> Defaults to "File"
+>
 > ---
 > ```ts
 > openBracketNewLine: boolean
 > ```
 > Defaults to false.
+> 
 > Basically Allman style for CSS rules when set to true.
 > <div style="text-align:center"><img src="./assets/IntellisenseAllmanStylePreview.png" /></div>
 

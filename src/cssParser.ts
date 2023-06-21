@@ -5,6 +5,8 @@ import { LayerParserConfig, LayerListObject } from './types';
 import { globSync } from 'glob';
 
 const consoleDisplayName = '[layer-parser]:';
+// The string used when joining lists to display them in the console.
+const consoleListJoinString = ',\n\t';
 // Store the sum of components and utilities from every document in the directory
 const componentList: Node[] = [];
 const utilityList: Node[] = [];
@@ -262,22 +264,27 @@ export default (config: LayerParserConfig): LayerListObject =>
 
 	if (invalidFiles.length > 0) 
 	{
-		warn(`Globbing resulted in files that did not end in .css:\n\t${invalidFiles.join('\n\t')}`);
+		warn(`Globbing resulted in files that did not end in .css:\n\t${invalidFiles.join(consoleListJoinString)}`);
 	}
 
 	if (missedRules.length > 0) 
 	{
-		let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} unlayed css rules not parsed:`;
+		let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} unlayered css rules not parsed:`;
 		if (config.debug) {
-			warnMessage += `\n\t${missedRules.map(rule => (rule as Rule).selector).join(',\n\t')}`;
+			// Get all the missedRule's selectors and display each on a new line.
+			warnMessage += `\n\t${missedRules.map(rule => (rule as Rule).selector.replace('\n','')).join(consoleListJoinString)}`;
 		}
 		warn(warnMessage);
 	}
 
 	if (duplicateRules.length > 0) 
 	{
-		const duplicateSelectors = duplicateRules.map((rule) => (rule as Rule).selector);
-		warn(`There were duplicate rules found:\n\t${duplicateSelectors.join('\n\t')}`);
+		let warnMessage = `The target directory: ${config.directory} had ${duplicateRules.length} rules with selectors that were already used (two styles for the same elements). Note, this only discovers duplicates in the TOP level of a layer or document, NOT nested styles.`
+		if (config.debug) {
+			// Get all the duplicate rule selectors and display each on a new line.
+			warnMessage += `\n\t${duplicateRules.map((rule) => (rule as Rule).selector.replace('\n', '')).join(consoleListJoinString)}`;
+		}
+		warn(warnMessage);
 	}
 
 	return {
