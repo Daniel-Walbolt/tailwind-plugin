@@ -7,16 +7,16 @@
 
 ---
 
-**Layer Parser** lets you autocomplete and preview **custom css** while utilizing the benefits of TailwindCSS.
+**Layer Parser** lets you autocomplete and preview custom css while utilizing the benefits of TailwindCSS.
 
-This is extremely useful for mono-repos using similar styling across several projects. Your custom CSS can be organized in dedicated files to use a more familiar CSS language rather than specifying classes through tailwind's native JSON syntax.
+This is extremely useful for monorepos using similar styling across several projects. Your custom CSS can be organized in dedicated files to use a more familiar CSS language rather than specifying classes through tailwind's native JSON syntax.
 
 ---
 
 ## Installation
 
 > **Warning**
-> This is a plugin for TailwindCSS, and can only be used in a project using TailwindCSS.
+> This is a plugin for TailwindCSS, and can only be used in a project using [TailwindCSS as a PostCSS plugin](https://tailwindcss.com/docs/installation/using-postcss).
 
 ```sh
 npm i tailwind-layer-parser
@@ -92,7 +92,7 @@ For those wanting to customize your experience...
 > ```
 > Determines what to do with classes that aren't located in @layer components {} or @layer utilities {}
 > 
-> Defaults to true.
+> Defaults to "Utility".
 >
 > ---
 > ```ts
@@ -108,15 +108,16 @@ For those wanting to customize your experience...
 > ```
 > Defaults to false.
 > 
-> Determines whether or not to report what files were found by the glob pattern.
-> Currently, there are print outs for the folowing:
+> Determines whether or not to provide additional details to console print-outs.
+> 
+> Currently, there are print-outs for the folowing:
 > - ALWAYS - Count of the rules that were not added because unlayeredBehavior ignored them.
 > - DEBUG - A list of the rules that were not added because unlayeredBehavior ignored them.
 > - ALWAYS - Count of the duplicate selectors found in target directory
 > - DEBUG - A list of duplicate selectors found in the target directory
 > - ALWAYS - A list of file names that matched the glob patterns but did not end with ".css"
 >
-> Plugin output is located in the output terminal, under "Tailwind CSS Intellisense"
+> Plugin output is located in the output terminal of VS Code, under "Tailwind CSS Intellisense."
 > <div style="text-align:center"><img src="./assets/TailwindOutputTerminal.png" /></div>
 >
 > ---
@@ -125,7 +126,7 @@ For those wanting to customize your experience...
 > ```
 >  Specify the comment you want above each of the previewed CSS rules. "File" shows only the rule's containing file's name. "Absolute" shows the exact path of the containing file. "None" removes the comment from the preview.
 >
-> Defaults to "File"
+> Defaults to "File".
 >
 > ---
 > ```ts
