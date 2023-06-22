@@ -40,6 +40,7 @@ var import_path = require("path");
 var import_postcss = __toESM(require("postcss"));
 var import_glob = require("glob");
 var consoleDisplayName = "[layer-parser]:";
+var consoleListJoinString = ",\n	";
 var componentList = [];
 var utilityList = [];
 var missedRules = [];
@@ -205,20 +206,23 @@ var cssParser_default = (config) => {
   }
   if (invalidFiles.length > 0) {
     warn(`Globbing resulted in files that did not end in .css:
-	${invalidFiles.join("\n	")}`);
+	${invalidFiles.join(consoleListJoinString)}`);
   }
   if (missedRules.length > 0) {
-    let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} unlayed css rules not parsed:`;
+    let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} unlayered css rules not parsed:`;
     if (config.debug) {
       warnMessage += `
-	${missedRules.map((rule) => rule.selector).join(",\n	")}`;
+	${missedRules.map((rule) => rule.selector.replace("\n", "")).join(consoleListJoinString)}`;
     }
     warn(warnMessage);
   }
   if (duplicateRules.length > 0) {
-    const duplicateSelectors = duplicateRules.map((rule) => rule.selector);
-    warn(`There were duplicate rules found:
-	${duplicateSelectors.join("\n	")}`);
+    let warnMessage = `The target directory: ${config.directory} had ${duplicateRules.length} rules with selectors that were already used (two styles for the same elements). Note, this only discovers duplicates in the TOP level of a layer or document, NOT nested styles.`;
+    if (config.debug) {
+      warnMessage += `
+	${duplicateRules.map((rule) => rule.selector.replace("\n", "")).join(consoleListJoinString)}`;
+    }
+    warn(warnMessage);
   }
   return {
     utilities: utilityList,
