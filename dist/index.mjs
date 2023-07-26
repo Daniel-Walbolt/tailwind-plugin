@@ -3,12 +3,21 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import postcss from "postcss";
 import { globSync } from "glob";
-var consoleDisplayName = "[layer-parser]:";
-var componentList = [];
-var utilityList = [];
-var missedRules = [];
-var processedRules = /* @__PURE__ */ new Set();
-var duplicateRules = [];
+var consoleMessagePrefix = "[layer-parser]:";
+var consoleListJoinString = (nested = 1) => {
+  let separator = "\n";
+  for (let i = 0; i < nested; i++) {
+    separator += "	";
+  }
+  separator += "- ";
+  return separator;
+};
+var components = /* @__PURE__ */ new Map();
+var utilities = /* @__PURE__ */ new Map();
+var keyframes = /* @__PURE__ */ new Map();
+var neededKeyFrames = /* @__PURE__ */ new Map();
+var duplicateRules = /* @__PURE__ */ new Map();
+var missedRules = /* @__PURE__ */ new Map();
 function log(message) {
   console.log(`${consoleMessagePrefix} ${message}`);
 }
@@ -30,10 +39,8 @@ function adjustNodeRaws(node, config, result, nesting = 1) {
       selectorIndents += "	";
     }
   }
-  let desiredBetween = config.openBracketNewLine
-    ? `
-${selectorIndents}`
-    : " ";
+  let desiredBetween = config.openBracketNewLine ? `
+${selectorIndents}` : " ";
   if (node.type === "rule") {
     const rule = node;
     const formattedSelectors = rule.selectors.join(`,
@@ -65,18 +72,14 @@ function hasNotProcessedRule(rule, result) {
   if (utilities.has(ruleIdentifier) || components.has(ruleIdentifier)) {
     let nodeStatistic = duplicateRules.get(ruleIdentifier);
     if (nodeStatistic) {
-      let nodeFileCount =
-        nodeStatistic == null ? void 0 : nodeStatistic.get(result.opts.from);
+      let nodeFileCount = nodeStatistic == null ? void 0 : nodeStatistic.get(result.opts.from);
       if (nodeFileCount) {
         nodeStatistic.set(result.opts.from, nodeFileCount + 1);
       } else {
         nodeStatistic.set(result.opts.from, 1);
       }
     } else {
-      duplicateRules.set(
-        ruleIdentifier,
-        /* @__PURE__ */ new Map([[result.opts.from, 1]])
-      );
+      duplicateRules.set(ruleIdentifier, /* @__PURE__ */ new Map([[result.opts.from, 1]]));
     }
     return false;
   }
@@ -99,10 +102,7 @@ function processRule(rule, result, config) {
   if (((_a = rule.parent) == null ? void 0 : _a.type) === "root") {
     if (hasNotProcessedRule(rule, result)) {
       if (config.unlayeredClassBehavior === "Ignore") {
-        let files =
-          (_b = missedRules.get(ruleIdentifier)) != null
-            ? _b
-            : /* @__PURE__ */ new Set();
+        let files = (_b = missedRules.get(ruleIdentifier)) != null ? _b : /* @__PURE__ */ new Set();
         files.add(result.opts.from);
         missedRules.set(ruleIdentifier, files);
         return;
@@ -150,10 +150,7 @@ function getTopRule(node, config) {
       if (atRuleParent.name !== "layer") {
         continue;
       }
-      if (
-        atRuleParent.params === "components" ||
-        atRuleParent.params === "utilities"
-      ) {
+      if (atRuleParent.params === "components" || atRuleParent.params === "utilities") {
         isTopParent = true;
         continue;
       }
@@ -176,7 +173,7 @@ function getParser(config) {
         },
         keyframes: (atRule, { result }) => {
           processAtRule(atRule, result, config);
-        },
+        }
       },
       Declaration: {
         "animation-name": (declaration, { result }) => {
@@ -184,24 +181,18 @@ function getParser(config) {
           const topParent = getTopRule(declaration, config);
           if (topParent != null && topParent.type == "rule") {
             const identifier = getIdentifier(topParent);
-            const set =
-              (_a = neededKeyFrames.get(declaration.value)) != null
-                ? _a
-                : /* @__PURE__ */ new Set();
+            const set = (_a = neededKeyFrames.get(declaration.value)) != null ? _a : /* @__PURE__ */ new Set();
             set.add(identifier);
             neededKeyFrames.set(`@keyframes ${declaration.value}`, set);
           }
-        },
-      },
+        }
+      }
     };
   };
 }
 function assignKeyframesToRules() {
   log("Assigning keyframes to rules");
-  for (const [
-    keyframeIdentifier,
-    ruleIdentifiers,
-  ] of neededKeyFrames.entries()) {
+  for (const [keyframeIdentifier, ruleIdentifiers] of neededKeyFrames.entries()) {
     log("Keyframe: " + keyframeIdentifier + " being added to");
     let keyframe = keyframes.get(keyframeIdentifier);
     if (keyframe == null) {
@@ -209,11 +200,7 @@ function assignKeyframesToRules() {
     }
     for (let ruleIdentifier of ruleIdentifiers) {
       log("Rule identifier: " + ruleIdentifier);
-      const targetMap = components.has(ruleIdentifier)
-        ? components
-        : utilities.has(ruleIdentifier)
-        ? utilities
-        : void 0;
+      const targetMap = components.has(ruleIdentifier) ? components : utilities.has(ruleIdentifier) ? utilities : void 0;
       if (targetMap == void 0) {
         continue;
       }
@@ -235,43 +222,27 @@ function verifyConfiguration(config) {
     warn("There was no directory provided. Defaulting to process.cwd().");
     config.directory = process.cwd();
   }
-  (_a = config.commentType) != null ? _a : (config.commentType = "File");
-  if (
-    config.commentType !== "File" &&
-    config.commentType != "Absolute" &&
-    config.commentType != "None"
-  ) {
+  (_a = config.commentType) != null ? _a : config.commentType = "File";
+  if (config.commentType !== "File" && config.commentType != "Absolute" && config.commentType != "None") {
     warn("Invalid configuration for commentType. Defaulting to 'File'");
     config.commentType = "File";
   }
-  (_b = config.openBracketNewLine) != null
-    ? _b
-    : (config.openBracketNewLine = false);
+  (_b = config.openBracketNewLine) != null ? _b : config.openBracketNewLine = false;
   if (verifyBoolean(config.openBracketNewLine)) {
     warn("Invalid configuration for openBracketNewLine. Defaulting to false");
     config.openBracketNewLine = false;
   }
-  (_c = config.debug) != null ? _c : (config.debug = false);
+  (_c = config.debug) != null ? _c : config.debug = false;
   if (verifyBoolean(config.debug)) {
     warn("Invalid configuration for debug. Defaulting to false.");
     config.debug = false;
   }
-  (_d = config.unlayeredClassBehavior) != null
-    ? _d
-    : (config.unlayeredClassBehavior = "Utility");
-  if (
-    config.unlayeredClassBehavior !== "Utility" &&
-    config.unlayeredClassBehavior !== "Component" &&
-    config.unlayeredClassBehavior !== "Ignore"
-  ) {
-    warn(
-      "Invalid configuration for unlayedClassBehavior. Defaulting to Utility"
-    );
+  (_d = config.unlayeredClassBehavior) != null ? _d : config.unlayeredClassBehavior = "Utility";
+  if (config.unlayeredClassBehavior !== "Utility" && config.unlayeredClassBehavior !== "Component" && config.unlayeredClassBehavior !== "Ignore") {
+    warn("Invalid configuration for unlayedClassBehavior. Defaulting to Utility");
     config.unlayeredClassBehavior = "Utility";
   }
-  (_e = config.globPatterns) != null
-    ? _e
-    : (config.globPatterns = ["**/*.css"]);
+  (_e = config.globPatterns) != null ? _e : config.globPatterns = ["**/*.css"];
 }
 function resetData() {
   if (components.size == 0 && utilities.size == 0) {
@@ -284,12 +255,10 @@ function cssParser(config) {
   if (config.globPatterns != void 0 && config.globPatterns.length > 0) {
     for (let pattern of config.globPatterns) {
       if (pattern.startsWith("/**")) {
-        error(
-          `User attempted to glob their entire computer using: ${pattern}. This would result in a serious performance problem, and thus parsing has been skipped.`
-        );
+        error(`User attempted to glob their entire computer using: ${pattern}. This would result in a serious performance problem, and thus parsing has been skipped.`);
         return {
           components: [],
-          utilities: [],
+          utilities: []
         };
       }
     }
@@ -300,7 +269,7 @@ function cssParser(config) {
   const resolvedDirectory = resolve(config.directory);
   let result = [];
   result = globSync(config.globPatterns, {
-    cwd: resolvedDirectory,
+    cwd: resolvedDirectory
   });
   log(`Searched directory: ${resolvedDirectory}`);
   if (config.debug) {
@@ -308,7 +277,7 @@ function cssParser(config) {
   }
   const cssParser2 = {
     postcssPlugin: "layer-parser",
-    prepare: getParser(config),
+    prepare: getParser(config)
   };
   const invalidFiles = [];
   const processor = postcss([cssParser2]);
@@ -317,17 +286,15 @@ function cssParser(config) {
     case "Absolute":
       parseFile = (fileName, fullPath) => {
         const file = readFileSync(fullPath, "utf8");
-        processor
-          .process(file, { from: fullPath, to: fullPath })
-          .then((result2) => {});
+        processor.process(file, { from: fullPath, to: fullPath }).then((result2) => {
+        });
       };
       break;
     default:
       parseFile = (fileName, fullPath) => {
         const file = readFileSync(fullPath, "utf8");
-        processor
-          .process(file, { from: fileName, to: fileName })
-          .then((result2) => {});
+        processor.process(file, { from: fileName, to: fileName }).then((result2) => {
+        });
       };
       break;
   }
@@ -341,25 +308,41 @@ function cssParser(config) {
   }
   if (invalidFiles.length > 0) {
     warn(`Globbing resulted in files that did not end in .css:
-	${invalidFiles.join("\n	")}`);
+	${invalidFiles.join(consoleListJoinString())}`);
   }
-  if (missedRules.length > 0) {
-    let warnMessage = `The target directory: ${config.directory} had ${missedRules.length} unlayed css rules not parsed:`;
+  if (missedRules.size > 0) {
+    let warnMessage = `The target directory: ${config.directory} had ${missedRules.size} unlayered css rules not parsed:`;
     if (config.debug) {
-      warnMessage += `
-	${missedRules.map((rule) => rule.selector).join(",\n	")}`;
+      for (let [selector, location] of missedRules) {
+        warnMessage += `
+	${selector}`;
+        warnMessage += "\n		- ";
+        warnMessage += Array.from(location.values()).join(consoleListJoinString(2));
+      }
     }
     warn(warnMessage);
   }
-  if (duplicateRules.length > 0) {
-    const duplicateSelectors = duplicateRules.map((rule) => rule.selector);
-    warn(`There were duplicate rules found:
-	${duplicateSelectors.join("\n	")}`);
+  if (duplicateRules.size > 0) {
+    let debugMessage = "";
+    let duplicateRuleCount = 0;
+    for (let [selector, stat] of duplicateRules) {
+      debugMessage += `
+	${selector}`;
+      for (let [file, count] of stat) {
+        debugMessage += `${consoleListJoinString(2)}${file} - ${count}`;
+        duplicateRuleCount += count;
+      }
+    }
+    let warnMessage = `Found ${duplicateRuleCount} rules with selectors that were already used. Note, this only discovers duplicates in the TOP level of a layer or document--NOT nested styles. Also only shows duplicate counts of rules that would be added based on the configuration.`;
+    if (config.debug) {
+      warnMessage += debugMessage;
+    }
+    warn(warnMessage);
   }
   assignKeyframesToRules();
   return {
     utilities: Array.from(utilities.values()),
-    components: Array.from(components.values()),
+    components: Array.from(components.values())
   };
 }
 
@@ -374,16 +357,22 @@ function ParseDirectory(config) {
     for (const component of classes.components) {
       addComponents(component);
     }
-    addUtilities({
-      "keyframes test-animation": {
-        "50%": {
-          "background-color": "red",
+    addUtilities(
+      {
+        "keyframes test-animation": {
+          "50%": {
+            "background-color": "red"
+          }
         },
-      },
-      "test-animation": {
-        animation: "test-animation 1s ease infinite",
-      },
-    });
+        "test-animation": {
+          "animation": "test-animation 1s ease infinite"
+        }
+      }
+    );
   };
 }
-export { ParseDirectory, cssParser, resetData };
+export {
+  ParseDirectory,
+  cssParser,
+  resetData
+};
