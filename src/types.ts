@@ -1,8 +1,8 @@
 import { Node } from 'postcss';
 
 export type LayerListObject = {
-	utilities: Node[];
-	components: Node[];
+	utilities: (Node | Node[])[];
+	components: (Node | Node[])[];
 };
 
 export type LayerLocation = "File" | "Absolute" | "None";
@@ -12,7 +12,6 @@ export type LayerParserConfig = {
 	/**
 	 * The path of the directory that you want to be added.
 	 *
-	 *
 	 * Defaults to the current working directory using Node:path library.
 	 */
 	directory?: string;
@@ -21,9 +20,9 @@ export type LayerParserConfig = {
 	 * Should this plugin parse classes that aren't in a component or utilities layer?
 	 * 
 	 * Defaults to Utility
-	 * @param Ignore Parse classes without a tailwind layer as utilities
+	 * @param Ignore Do not add classes that do not belong to a tailwind layer.
 	 * @param Component Parse classes without a tailwind layer as components.
-	 * @param Utility Do not add classes that do not belong to a tailwind layer.
+	 * @param Utility Parse classes without a tailwind layer as utilities.
 	 */
 	unlayeredClassBehavior?: UnlayeredClassBehavior;
 

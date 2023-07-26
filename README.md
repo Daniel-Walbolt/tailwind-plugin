@@ -52,7 +52,7 @@ pnpm add tailwind-layer-parser
 ```js
 
 const plugin = require("tailwindcss/plugin");
-const { ParseCSSDirectoryPlugin } = require("tailwind-layer-parser"); // Import the helper function
+const { ParseDirectory } = require("tailwind-layer-parser"); // Import the helper function
 
 /** @type {import('tailwindcss').Config} \*/
 module.exports = {
@@ -62,24 +62,25 @@ module.exports = {
     },
     plugins: [
         plugin(
-            ParseCSSDirectoryPlugin({
-                directory: `${__dirname}/css`
+            ParseDirectory({
+                directory: `${__dirname}/css` // config object here
             });
         ),
     ],
 };
 ```
-3. If you have configured your target directory properly, your classes should now show up in your intellisense.
+3. If you have configured your target directory properly, your classes should now show up in your intellisense. This requires the TailwiindCSS Intellisense extension to be installed. Only tested in VS code.
 <div style="text-align:center"><img src="./assets/IntellisenseCommentPreview.png" /></div>
 
 ## Configuration
 For those wanting to customize your experience...
 > **Note**
 > Typings for the configuration can be explored in your code editor as well.
-
-> **Warning**
 > Adjustments to CSS rules are for intellisense preview only, and do not modify the CSS in files.
-
+>
+> **Warning**
+> You should not invoke the helper function more than once per ```tailwind.config.js```. Doing so will result in inaccuracies and may cause unexpected stylings.
+> 
 > **Properties**
 > ```ts
 > directory: string
@@ -101,6 +102,8 @@ For those wanting to customize your experience...
 > Customize the glob patterns used to match css files in the provided directory. Internally, the [glob](https://www.npmjs.com/package/glob) package is used; use their docs for reference on proper glob patterns.
 > 
 > Defaults to match all immediate and nested .css files ("**/*.css")
+>
+> It is recommended to better utilize this setting than use additional ```ParseDirectory``` invocations for parsing multiple directories. Multiple invocations of this method will cause inaccurate tracking of duplicate rules and will add them all to TailwindCSS. This will result in multiple stylings for the same class name. For some this may be a feature, but it generally means you have a messy style system.
 >
 > ---
 > ```ts
@@ -129,6 +132,7 @@ For those wanting to customize your experience...
 > Defaults to "File".
 >
 > ---
+> 
 > ```ts
 > openBracketNewLine: boolean
 > ```
@@ -136,9 +140,16 @@ For those wanting to customize your experience...
 > 
 > Basically Allman style for CSS rules when set to true.
 > <div style="text-align:center"><img src="./assets/IntellisenseAllmanStylePreview.png" /></div>
+> <br/>
 
 ## Extras
-There is an additonal export from the plugin: ```cssParser```. This is the underlying processor for globbing, parsing, modifying, and preparing the desired CSS. This export allows the adventurous developers to make their own tailwind plugin and do their own processing AFTER this plugin.
+There are two additonal exports from this plugin. 
+
+* ```cssParser``` is the underlying processor for globbing, parsing, modifying, and preparing the desired CSS. Also allows the adventurous developers to make their own tailwind plugin and do their own processing AFTER this plugin. 
+
+* ```resetData``` is a utility function that clears the parsed components and utilities; the helper function calls this before each execution. 
+
+By default ```cssParser``` internally stores all parsed components and utilities. Subsequent parses on different directories will be able to compare against class selectors parsed by previous invocations. This generally helps to identify duplicate styles that may be unwanted.
 
 > **Note**
 > The result of ```cssParser``` is an object. You can also view this type in your code editor.
@@ -150,7 +161,7 @@ There is an additonal export from the plugin: ```cssParser```. This is the under
 > ```
 > ```Node``` type comes from the ```PostCSS``` package.
 
-For those who have their ```tailwind.config.js``` in a separate directory tree than the target css, trying something like this for your ```directory``` to find it:
+For those who have their ```tailwind.config.js``` in a separate directory tree than the target css, try something like this for your ```directory``` to find it:
 ```js
 `${__dirname}/../css`
 ```

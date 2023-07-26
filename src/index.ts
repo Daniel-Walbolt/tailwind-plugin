@@ -1,17 +1,18 @@
-import cssParser from './cssParser';
 import { LayerParserConfig } from './types';
 export * from './types';
-import { watch } from 'fs';
+import { resetData, cssParser } from './cssParser';
 
 /**
- * Provides quick and easy usage of the cssParser provided by the tailwind-layer-parser plugin. Call this method in TailwindCSS's plugin()
- *
- * Uses the default configuration.
+ * Provides quick and easy usage of the cssParser provided by the tailwind-layer-parser plugin. 
+ * Adds parsed components and utilities to tailwind.
+ * 
+ * Call this method in TailwindCSS's plugin()
  */
-function ParseCSSDirectoryPlugin(config: LayerParserConfig) 
+function ParseDirectory(config: LayerParserConfig) 
 {
-	return ({ addUtilities, addComponents }) => 
+	return ({ addUtilities, addComponents, matchUtilities }) => 
 	{
+		resetData();
 		const classes = cssParser(config);
 
 		for (const utility of classes.utilities) 
@@ -23,7 +24,42 @@ function ParseCSSDirectoryPlugin(config: LayerParserConfig)
 		{
 			addComponents(component);
 		}
+
+		// matchUtilities(
+		// {
+		// 	animate: (value) => {
+		// 		return [
+		// 			{
+		// 				'@keyframes test-animation':
+		// 				{
+		// 					'50%': {
+		// 						'background-color': 'red'
+		// 					}
+		// 				}
+		// 			},
+		// 			{
+		// 				animation: 'test-animation 1s ease infinite'
+		// 			}
+		// 		];
+		// 	}
+		// },
+		// {
+		// 	values: { 'test-animation': ''}
+		// });
+		addUtilities(
+			{
+				'keyframes test-animation':
+				{
+					'50%': {
+						'background-color': 'red'
+					}	
+				},
+				'test-animation': {
+					'animation': 'test-animation 1s ease infinite'
+				}
+			}
+		)
 	};
 }
 
-export { cssParser, ParseCSSDirectoryPlugin };
+export { resetData, cssParser, ParseDirectory};

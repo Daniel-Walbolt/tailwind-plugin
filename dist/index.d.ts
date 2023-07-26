@@ -1,15 +1,14 @@
 import { Node } from 'postcss';
 
 type LayerListObject = {
-    utilities: Node[];
-    components: Node[];
+    utilities: (Node | Node[])[];
+    components: (Node | Node[])[];
 };
 type LayerLocation = "File" | "Absolute" | "None";
 type UnlayeredClassBehavior = "Ignore" | "Component" | "Utility";
 type LayerParserConfig = {
     /**
      * The path of the directory that you want to be added.
-     *
      *
      * Defaults to the current working directory using Node:path library.
      */
@@ -18,9 +17,9 @@ type LayerParserConfig = {
      * Should this plugin parse classes that aren't in a component or utilities layer?
      *
      * Defaults to Utility
-     * @param Ignore Parse classes without a tailwind layer as utilities
+     * @param Ignore Do not add classes that do not belong to a tailwind layer.
      * @param Component Parse classes without a tailwind layer as components.
-     * @param Utility Do not add classes that do not belong to a tailwind layer.
+     * @param Utility Parse classes without a tailwind layer as utilities.
      */
     unlayeredClassBehavior?: UnlayeredClassBehavior;
     /**
@@ -49,16 +48,26 @@ type LayerParserConfig = {
     openBracketNewLine: boolean;
 };
 
-declare const _default: (config: LayerParserConfig) => LayerListObject;
+/**
+ * Resets the parsed utilities and components.
+ *
+ * Useful for parsing separate directories of css stylings for different tailwind configurations.
+ *
+ * Used by default by the plugin helper function.
+ */
+declare function resetData(): void;
+declare function cssParser(config: LayerParserConfig): LayerListObject;
 
 /**
- * Provides quick and easy usage of the cssParser provided by the tailwind-layer-parser plugin. Call this method in TailwindCSS's plugin()
+ * Provides quick and easy usage of the cssParser provided by the tailwind-layer-parser plugin.
+ * Adds parsed components and utilities to tailwind.
  *
- * Uses the default configuration.
+ * Call this method in TailwindCSS's plugin()
  */
-declare function ParseCSSDirectoryPlugin(config: LayerParserConfig): ({ addUtilities, addComponents }: {
+declare function ParseDirectory(config: LayerParserConfig): ({ addUtilities, addComponents, matchUtilities }: {
     addUtilities: any;
     addComponents: any;
+    matchUtilities: any;
 }) => void;
 
-export { LayerListObject, LayerLocation, LayerParserConfig, ParseCSSDirectoryPlugin, UnlayeredClassBehavior, _default as cssParser };
+export { LayerListObject, LayerLocation, LayerParserConfig, ParseDirectory, UnlayeredClassBehavior, cssParser, resetData };
