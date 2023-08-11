@@ -43,11 +43,29 @@ function convertAtRule(atRule, formattedObject = {}) {
 }
 
 // src/util/animationParser.ts
-var DIRECTIONS = /* @__PURE__ */ new Set(["normal", "reverse", "alternate", "alternate-reverse"]);
+var DIRECTIONS = /* @__PURE__ */ new Set([
+  "normal",
+  "reverse",
+  "alternate",
+  "alternate-reverse",
+]);
 var PLAY_STATES = /* @__PURE__ */ new Set(["running", "paused"]);
-var FILL_MODES = /* @__PURE__ */ new Set(["none", "forwards", "backwards", "both"]);
+var FILL_MODES = /* @__PURE__ */ new Set([
+  "none",
+  "forwards",
+  "backwards",
+  "both",
+]);
 var ITERATION_COUNTS = /* @__PURE__ */ new Set(["infinite"]);
-var TIMINGS = /* @__PURE__ */ new Set(["linear", "ease", "ease-in", "ease-out", "ease-in-out", "step-start", "step-end"]);
+var TIMINGS = /* @__PURE__ */ new Set([
+  "linear",
+  "ease",
+  "ease-in",
+  "ease-out",
+  "ease-in-out",
+  "step-start",
+  "step-end",
+]);
 var TIMING_FNS = ["cubic-bezier", "steps"];
 var COMMA = /\,(?![^(]*\))/g;
 var SPACE = /\ +(?![^(]*\))/g;
@@ -71,13 +89,19 @@ function parseAnimationValue(input) {
       } else if (!seen.has("FILL_MODES") && FILL_MODES.has(part)) {
         result.fillMode = part;
         seen.add("FILL_MODES");
-      } else if (!seen.has("ITERATION_COUNTS") && (ITERATION_COUNTS.has(part) || DIGIT.test(part))) {
+      } else if (
+        !seen.has("ITERATION_COUNTS") &&
+        (ITERATION_COUNTS.has(part) || DIGIT.test(part))
+      ) {
         result.iterationCount = part;
         seen.add("ITERATION_COUNTS");
       } else if (!seen.has("TIMING_FUNCTION") && TIMINGS.has(part)) {
         result.timingFunction = part;
         seen.add("TIMING_FUNCTION");
-      } else if (!seen.has("TIMING_FUNCTION") && TIMING_FNS.some((f) => part.startsWith(`${f}(`))) {
+      } else if (
+        !seen.has("TIMING_FUNCTION") &&
+        TIMING_FNS.some((f) => part.startsWith(`${f}(`))
+      ) {
         result.timingFunction = part;
         seen.add("TIMING_FUNCTION");
       } else if (!seen.has("DURATION") && TIME.test(part)) {
@@ -90,7 +114,7 @@ function parseAnimationValue(input) {
         result.name = part;
         seen.add("NAME");
       } else {
-        (_a = result.unknown) != null ? _a : result.unknown = [];
+        (_a = result.unknown) != null ? _a : (result.unknown = []);
         result.unknown.push(part);
       }
     }
@@ -106,29 +130,44 @@ function resetData() {
   animationRuleQueue.clear();
 }
 function attemptToProcessKeyframe(atRule, result, config) {
-  if (atRule.name = "keyframes") {
+  if ((atRule.name = "keyframes")) {
     let atRuleIdentifier = getIdentifier(atRule);
     keyframes.set(atRuleIdentifier, atRule);
     return true;
   }
   return false;
 }
-function matchKeyframesToRules(matchedKeyframes2, components2, utilities2, missedKeyframes2, config) {
+function matchKeyframesToRules(
+  matchedKeyframes2,
+  components2,
+  utilities2,
+  missedKeyframes2,
+  config
+) {
   var _a;
-  for (const [ruleIdentifier, ruleAndKeyframes] of animationRuleQueue.entries()) {
+  for (const [
+    ruleIdentifier,
+    ruleAndKeyframes,
+  ] of animationRuleQueue.entries()) {
     const rule = ruleAndKeyframes.rule;
     components2.delete(ruleIdentifier);
     utilities2.delete(ruleIdentifier);
     const jsonStringifiedUtility = convertRule(rule, {}, false);
     let intellisensePrefix = config.animationPrefix;
-    const matchedKeyframe = new MatchedUtility({
-      node: rule,
-      stringifiedNode: jsonStringifiedUtility
-    }, intellisensePrefix);
+    const matchedKeyframe = new MatchedUtility(
+      {
+        node: rule,
+        stringifiedNode: jsonStringifiedUtility,
+      },
+      intellisensePrefix
+    );
     for (const keyframeIdentifier of ruleAndKeyframes.keyframes) {
       let keyframe = keyframes.get(keyframeIdentifier);
       if (keyframe == void 0) {
-        let missedKeyframeSet = (_a = missedKeyframes2.get(keyframeIdentifier)) != null ? _a : /* @__PURE__ */ new Set();
+        let missedKeyframeSet =
+          (_a = missedKeyframes2.get(keyframeIdentifier)) != null
+            ? _a
+            : /* @__PURE__ */ new Set();
         if (!missedKeyframeSet.has(rule.selector)) {
           missedKeyframeSet.add(rule.selector);
         }
@@ -137,7 +176,7 @@ function matchKeyframesToRules(matchedKeyframes2, components2, utilities2, misse
       const jsonStringifiedMatch = convertAtRule(keyframe);
       matchedKeyframe.content.push({
         node: keyframe,
-        stringifiedNode: jsonStringifiedMatch
+        stringifiedNode: jsonStringifiedMatch,
       });
     }
     matchedKeyframes2.set(ruleIdentifier, matchedKeyframe);
@@ -154,7 +193,10 @@ function registerAnimationDeclaration(declaration, topParentRule) {
       if (animationName == void 0) {
         continue;
       }
-      const ruleAndKeyframes = (_a = animationRuleQueue.get(ruleIdentifier)) != null ? _a : { rule: topParentRule, keyframes: /* @__PURE__ */ new Set() };
+      const ruleAndKeyframes =
+        (_a = animationRuleQueue.get(ruleIdentifier)) != null
+          ? _a
+          : { rule: topParentRule, keyframes: /* @__PURE__ */ new Set() };
       if (!ruleAndKeyframes.keyframes.has(animationName)) {
         ruleAndKeyframes.keyframes.add(`@keyframes ${animationName}`);
       }
@@ -164,7 +206,10 @@ function registerAnimationDeclaration(declaration, topParentRule) {
     return addedAnimation;
   } else if (declaration.prop == "animation-name") {
     const ruleIdentifier = getIdentifier(topParentRule);
-    const ruleAndKeyframes = (_b = animationRuleQueue.get(ruleIdentifier)) != null ? _b : { rule: topParentRule, keyframes: /* @__PURE__ */ new Set() };
+    const ruleAndKeyframes =
+      (_b = animationRuleQueue.get(ruleIdentifier)) != null
+        ? _b
+        : { rule: topParentRule, keyframes: /* @__PURE__ */ new Set() };
     if (!ruleAndKeyframes.keyframes.has(declaration.value)) {
       ruleAndKeyframes.keyframes.add(`@keyframes ${declaration.value}`);
     }
@@ -198,8 +243,10 @@ function formatNode(node, config, result, originalParentRule, nesting = 1) {
       selectorIndents += "	";
     }
   }
-  let desiredBetween = config.openBracketNewLine ? `
-${selectorIndents}` : " ";
+  let desiredBetween = config.openBracketNewLine
+    ? `
+${selectorIndents}`
+    : " ";
   if (node.type === "rule") {
     const rule = node;
     const formattedSelectors = rule.selectors.join(`,
@@ -239,18 +286,15 @@ var MatchedUtility = class {
     this.rule = rule;
     this.intellisensePrefix = intellisenseValue;
   }
-  /** 
-   * Provides all the content for tailwind to process. Defines the suffix used in intellisense and provides the CSS styles.	
+  /**
+   * Provides all the content for tailwind to process. Defines the suffix used in intellisense and provides the CSS styles.
    */
   getMatchedContent() {
     let matcher = {};
     let stringifiedMatches = this.content.map((x) => x.stringifiedNode);
     let contentObject = Object.fromEntries(stringifiedMatches.entries());
     matcher[this.intellisensePrefix] = (value) => {
-      return [
-        contentObject,
-        this.rule.stringifiedNode
-      ];
+      return [contentObject, this.rule.stringifiedNode];
     };
     return matcher;
   }
@@ -259,13 +303,13 @@ var MatchedUtility = class {
    * ```
    * .{prefix}-{suffix}
    * ```
-  */
+   */
   getMatchedValues() {
     let suffixes = {};
     let identifier = getIdentifier(this.rule.node).match(/\w+/g).join("-");
     suffixes[identifier] = "";
     return {
-      values: suffixes
+      values: suffixes,
     };
   }
 };
@@ -308,14 +352,18 @@ function hasNotProcessedRule(node, result) {
   if (utilities.has(ruleIdentifier) || components.has(ruleIdentifier)) {
     let nodeStatistic = duplicateRules.get(ruleIdentifier);
     if (nodeStatistic) {
-      let nodeFileCount = nodeStatistic == null ? void 0 : nodeStatistic.get(result.opts.from);
+      let nodeFileCount =
+        nodeStatistic == null ? void 0 : nodeStatistic.get(result.opts.from);
       if (nodeFileCount) {
         nodeStatistic.set(result.opts.from, nodeFileCount + 1);
       } else {
         nodeStatistic.set(result.opts.from, 1);
       }
     } else {
-      duplicateRules.set(ruleIdentifier, /* @__PURE__ */ new Map([[result.opts.from, 1]]));
+      duplicateRules.set(
+        ruleIdentifier,
+        /* @__PURE__ */ new Map([[result.opts.from, 1]])
+      );
     }
     return false;
   }
@@ -327,7 +375,10 @@ function processRule(rule, result, config) {
   if (((_a = rule.parent) == null ? void 0 : _a.type) === "root") {
     if (hasNotProcessedRule(rule, result)) {
       if (config.unlayeredClassBehavior === "Ignore") {
-        let files = (_b = missedRules.get(ruleIdentifier)) != null ? _b : /* @__PURE__ */ new Set();
+        let files =
+          (_b = missedRules.get(ruleIdentifier)) != null
+            ? _b
+            : /* @__PURE__ */ new Set();
         files.add(result.opts.from);
         missedRules.set(ruleIdentifier, files);
         return;
@@ -364,8 +415,8 @@ function getParser(config) {
       AtRule: {
         keyframes: (atRule, { result }) => {
           processAtRule(atRule, result, config);
-        }
-      }
+        },
+      },
     };
   };
 }
@@ -376,28 +427,47 @@ function verifyConfiguration(config) {
     warn("There was no directory provided. Defaulting to process.cwd().");
     config.directory = process.cwd();
   }
-  (_a = config.commentType) != null ? _a : config.commentType = "File";
-  if (config.commentType !== "File" && config.commentType != "Absolute" && config.commentType != "None") {
+  (_a = config.commentType) != null ? _a : (config.commentType = "File");
+  if (
+    config.commentType !== "File" &&
+    config.commentType != "Absolute" &&
+    config.commentType != "None"
+  ) {
     warn("Invalid configuration for commentType. Defaulting to 'File'");
     config.commentType = "File";
   }
-  (_b = config.openBracketNewLine) != null ? _b : config.openBracketNewLine = false;
+  (_b = config.openBracketNewLine) != null
+    ? _b
+    : (config.openBracketNewLine = false);
   if (verifyBoolean(config.openBracketNewLine)) {
     warn("Invalid configuration for openBracketNewLine. Defaulting to false");
     config.openBracketNewLine = false;
   }
-  (_c = config.debug) != null ? _c : config.debug = false;
+  (_c = config.debug) != null ? _c : (config.debug = false);
   if (verifyBoolean(config.debug)) {
     warn("Invalid configuration for debug. Defaulting to false.");
     config.debug = false;
   }
-  (_d = config.unlayeredClassBehavior) != null ? _d : config.unlayeredClassBehavior = "Utility";
-  if (config.unlayeredClassBehavior !== "Utility" && config.unlayeredClassBehavior !== "Component" && config.unlayeredClassBehavior !== "Ignore") {
-    warn("Invalid configuration for unlayedClassBehavior. Defaulting to Utility");
+  (_d = config.unlayeredClassBehavior) != null
+    ? _d
+    : (config.unlayeredClassBehavior = "Utility");
+  if (
+    config.unlayeredClassBehavior !== "Utility" &&
+    config.unlayeredClassBehavior !== "Component" &&
+    config.unlayeredClassBehavior !== "Ignore"
+  ) {
+    warn(
+      "Invalid configuration for unlayedClassBehavior. Defaulting to Utility"
+    );
     config.unlayeredClassBehavior = "Utility";
   }
-  (_e = config.globPatterns) != null ? _e : config.globPatterns = ["**/*.css"];
-  if (config.animationPrefix == void 0 || config.animationPrefix.trim().length == 0) {
+  (_e = config.globPatterns) != null
+    ? _e
+    : (config.globPatterns = ["**/*.css"]);
+  if (
+    config.animationPrefix == void 0 ||
+    config.animationPrefix.trim().length == 0
+  ) {
     config.animationPrefix = "animate";
   }
 }
@@ -414,11 +484,13 @@ function CSSParser(config) {
   if (config.globPatterns != void 0 && config.globPatterns.length > 0) {
     for (let pattern of config.globPatterns) {
       if (pattern.startsWith("/**")) {
-        error(`User attempted to glob their entire computer using: ${pattern}. This would result in a serious performance problem, and thus parsing has been skipped.`);
+        error(
+          `User attempted to glob their entire computer using: ${pattern}. This would result in a serious performance problem, and thus parsing has been skipped.`
+        );
         return {
           components: [],
           utilities: [],
-          keyframeUtilities: []
+          keyframeUtilities: [],
         };
       }
     }
@@ -430,7 +502,7 @@ function CSSParser(config) {
   const resolvedDirectory = resolve(config.directory);
   let result = [];
   result = globSync(config.globPatterns, {
-    cwd: resolvedDirectory
+    cwd: resolvedDirectory,
   });
   if (config.debug) {
     log(`Searched directories: ${resolvedDirectory}`);
@@ -438,7 +510,7 @@ function CSSParser(config) {
   }
   const cssParser = {
     postcssPlugin: "layer-parser",
-    prepare: getParser(config)
+    prepare: getParser(config),
   };
   const invalidFiles = [];
   const processor = postcss([cssParser]);
@@ -447,15 +519,17 @@ function CSSParser(config) {
     case "Absolute":
       parseFile = (fileName, fullPath) => {
         const file = readFileSync(fullPath, "utf8");
-        processor.process(file, { from: fullPath, to: fullPath }).then((result2) => {
-        });
+        processor
+          .process(file, { from: fullPath, to: fullPath })
+          .then((result2) => {});
       };
       break;
     default:
       parseFile = (fileName, fullPath) => {
         const file = readFileSync(fullPath, "utf8");
-        processor.process(file, { from: fileName, to: fileName }).then((result2) => {
-        });
+        processor
+          .process(file, { from: fileName, to: fileName })
+          .then((result2) => {});
       };
       break;
   }
@@ -478,7 +552,9 @@ function CSSParser(config) {
         warnMessage += `
 	${selector}`;
         warnMessage += "\n		- ";
-        warnMessage += Array.from(location.values()).join(consoleListJoinString(2));
+        warnMessage += Array.from(location.values()).join(
+          consoleListJoinString(2)
+        );
       }
     }
     warn(warnMessage);
@@ -500,7 +576,13 @@ function CSSParser(config) {
     }
     warn(warnMessage);
   }
-  matchKeyframesToRules(matchedKeyframes, components, utilities, missedKeyframes, config);
+  matchKeyframesToRules(
+    matchedKeyframes,
+    components,
+    utilities,
+    missedKeyframes,
+    config
+  );
   if (missedKeyframes.size > 0) {
     let debugMessage = "";
     let missedKeyframeCount = 0;
@@ -521,7 +603,7 @@ function CSSParser(config) {
   return {
     utilities: Array.from(utilities.values()),
     components: Array.from(components.values()),
-    keyframeUtilities: Array.from(matchedKeyframes.values())
+    keyframeUtilities: Array.from(matchedKeyframes.values()),
   };
 }
 
@@ -548,5 +630,5 @@ export {
   MatchedUtility,
   ParseCSS,
   CSSParser as cssParser,
-  resetData2 as resetData
+  resetData2 as resetData,
 };
