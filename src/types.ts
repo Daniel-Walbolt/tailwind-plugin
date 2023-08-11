@@ -1,12 +1,94 @@
-import { Node } from 'postcss';
+import { AtRule, Node, Rule } from 'postcss';
+import * as Formatter from './util/nodeFormatter';
 
 export type LayerListObject = {
-	utilities: (Node | Node[])[];
-	components: (Node | Node[])[];
+	utilities: Node[];
+	components: Node[];
+	keyframeUtilities: MatchedUtility[]
 };
 
 export type LayerLocation = "File" | "Absolute" | "None";
 export type UnlayeredClassBehavior = "Ignore" | "Component" | "Utility";
+export type StringifiedJSON = {
+    [key: string]: string | StringifiedJSON;
+}
+
+type MatchedUtilityContent = {
+	[intellisensePrefix: string]: (value: string) => (StringifiedJSON | { [key: string]: StringifiedJSON})[];
+}
+
+type MatchedUtilityValues = {
+	/**
+	 * Each KEY is the suffix the user specifies in addition to the prefix defined by the function that assigns CSS nodes {@link MatchedUtilityContent}
+	 * 
+	 * Each VALUE is the VALUE that gets passed into the function that assigns the CSS nodes {@link MatchedUtilityContent}
+	 */
+	values: {
+		[intellisenseSuffix: string]: string
+	}
+}
+
+/**
+ * Relates a rule to multiple other nodes for use in tailwind's matchUtilities() function
+ * 
+ * ```
+ * matchUtilities(
+ *		matchedUtility.getMatchedContent(),
+ *		matchedUtility.getMatchedValues()
+ * )
+ * ```
+ */
+export class MatchedUtility {
+	content: MatchedNode<AtRule>[] = [];
+	rule: MatchedNode<Rule>;
+	intellisensePrefix: string;
+
+	constructor (rule: MatchedNode<Rule>, intellisenseValue: string)
+	{
+		this.rule = rule;
+		this.intellisensePrefix = intellisenseValue;
+	}
+
+	/** 
+	 * Provides all the content for tailwind to process. Defines the suffix used in intellisense and provides the CSS styles.	
+	 */
+	getMatchedContent(): MatchedUtilityContent
+	{
+		let matcher: MatchedUtilityContent = {};
+		let stringifiedMatches = this.content.map(x => x.stringifiedNode);
+		let contentObject = Object.fromEntries(stringifiedMatches.entries());
+		matcher[this.intellisensePrefix] = (value: string) => {
+			return [
+				contentObject,
+				this.rule.stringifiedNode
+			]
+		}
+		return matcher;
+	};
+	/** Provides the suffixes that CAN be used with the prefix.
+	 * These suffixes can provide values that can manipulate the stylings, but this plugin doesn't support those yet.
+	 * ```
+	 * .{prefix}-{suffix}
+	 * ```
+	*/
+	getMatchedValues(): { values: {[intellisenseSuffix: string]: string} }
+	{
+		let suffixes: { [key: string]: string } = {};
+		// Get the identifier of the rule, and select all the word characters and dashes. If multiple words are matched in the identifier (i.e. .sample,.test -> sample-test)
+		let identifier = Formatter.getIdentifier(this.rule.node).match(/\w+/g).join("-");
+		suffixes[identifier] = '';
+		return {
+			values: suffixes
+		};
+	}
+}
+
+/** Stores a PostCSS node along with the stringifiedJson version of it. */
+export type MatchedNode<T> = {
+	node: T,
+	/** The stringified version of the node that is friendly for use with tailwind's matchUtilities() */
+	stringifiedNode: StringifiedJSON
+}
 
 export type LayerParserConfig = {
 	/**
@@ -53,4 +135,13 @@ export type LayerParserConfig = {
 	 * Should the opening bracket for styles appear on the next line?
 	 */
 	openBracketNewLine: boolean;
+
+	/**
+	 * The prefix to use for matching keyframes to rules. Due to the way tailwind expects plugins to group keyframes with rules, it requires a {prefix}-{suffix} combination.
+	 * 
+	 * The suffix will always be the name of the TOP MOST rule referencing keyframes.
+	 * 
+	 * This property defines the prefix, can NOT be undefined or blank. Defaults to "animate", just like tailwind's other animate classes (i.e. ```animate-ping```).
+	 */
+	animationPrefix: string;
 };

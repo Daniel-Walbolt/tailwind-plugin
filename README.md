@@ -45,32 +45,47 @@ pnpm add tailwind-layer-parser
     &.inner-inner-class {
         color: red;
     }
+} 
+
+@keyframes custom-animation {
+    50% {
+        opacity: 0.5;
+        background-color: red;
+    }
 }
+
+.heading-with-animation {
+    color: red;
+    animation: custom-animation 2s ease infinite;
+}
+
 ```
 2. Adjust your plugin list in your ```tailwind.config.js```
 
 ```js
-
 const plugin = require("tailwindcss/plugin");
-const { ParseDirectory } = require("tailwind-layer-parser"); // Import the helper function
+const { ParseCSS } = require("tailwind-layer-parser");
 
 /** @type {import('tailwindcss').Config} \*/
 module.exports = {
     content: ["./index.html", "./src/**/\*.{js,ts,vue}"],
     theme: {
         extend: {},
-    },
+        },
     plugins: [
         plugin(
-            ParseDirectory({
-                directory: `${__dirname}/css` // config object here
-            });
+            ParseCSS({
+                directory: `${__dirname}/css`, // config object here
+            })
         ),
     ],
 };
 ```
 3. If you have configured your target directory properly, your classes should now show up in your intellisense. This requires the TailwiindCSS Intellisense extension to be installed. Only tested in VS code.
-<div style="text-align:center"><img src="./assets/IntellisenseCommentPreview.png" /></div>
+<div style="display: flex; align-items: center; justify-content: center; gap: 5rem;">
+    <img src="./assets/IntellisenseCommentPreview.png" />
+    <img src="./assets/KeyframeIntellisensePreview.png"/>
+</div>
 
 ## Configuration
 For those wanting to customize your experience...
@@ -92,6 +107,11 @@ For those wanting to customize your experience...
 > unlayeredClassBehavior: "Ignore" | "Component" | "Utility"
 > ```
 > Determines what to do with classes that aren't located in @layer components {} or @layer utilities {}
+>
+> Utility means all styles not located in a layer are added as utilities.
+> Components means all styles not located in a layer are added as components.
+>
+> Refer to tailwind documentation for the difference between component and utilities.
 > 
 > Defaults to "Utility".
 >
@@ -103,7 +123,7 @@ For those wanting to customize your experience...
 > 
 > Defaults to match all immediate and nested .css files ("**/*.css")
 >
-> It is recommended to better utilize this setting than use additional ```ParseDirectory``` invocations for parsing multiple directories. Multiple invocations of this method will cause inaccurate tracking of duplicate rules and will add them all to TailwindCSS. This will result in multiple stylings for the same class name. For some this may be a feature, but it generally means you have a messy style system.
+> It is recommended to better utilize this setting than use additional ```ParseCSS``` invocations for parsing multiple directories. Multiple invocations of this method will cause inaccurate tracking of duplicate rules and will add them all to TailwindCSS. This will result in multiple stylings for the same class name. For some this may be a feature, but it generally means you have a messy style system.
 >
 > ---
 > ```ts
@@ -140,7 +160,17 @@ For those wanting to customize your experience...
 > 
 > Basically Allman style for CSS rules when set to true.
 > <div style="text-align:center"><img src="./assets/IntellisenseAllmanStylePreview.png" /></div>
-> <br/>
+>
+> ---
+>
+> ```ts
+> animationPrefix: string
+> ```
+> Specify the prefix to use when adding your custom stylings that reference keyframes.
+>
+> Due to the way tailwind requires keyframes be *matched* to CSS styles, these utilities require a {prefix}-{suffix} notation. This setting defines the prefix. The suffix is the name of your class referencing the keyframe(s). Supports nested styles, and nested keyframes. However, such nested nodes will be *unwrapped* before tailwind shows you them in intellisense.
+> 
+> Defaults to "animate", and can not be blank.
 
 ## Extras
 There are two additonal exports from this plugin. 
@@ -149,7 +179,7 @@ There are two additonal exports from this plugin.
 
 * ```resetData``` is a utility function that clears the parsed components and utilities; the helper function calls this before each execution. 
 
-By default ```cssParser``` internally stores all parsed components and utilities. Subsequent parses on different directories will be able to compare against class selectors parsed by previous invocations. This generally helps to identify duplicate styles that may be unwanted.
+By default ```cssParser``` internally stores all parsed components and utilities. Subsequent parses on different directories will be able to compare against selectors parsed by previous invocations. This generally helps to identify duplicate styles that may be unwanted.
 
 > **Note**
 > The result of ```cssParser``` is an object. You can also view this type in your code editor.
