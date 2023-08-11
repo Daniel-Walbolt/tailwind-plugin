@@ -93,9 +93,11 @@ For those wanting to customize your experience...
 > Typings for the configuration can be explored in your code editor as well.
 > Adjustments to CSS rules are for intellisense preview only, and do not modify the CSS in files.
 >
+
 > **Warning**
 > You should not invoke the helper function more than once per ```tailwind.config.js```. Doing so will result in inaccuracies and may cause unexpected stylings.
-> 
+>
+
 > **Properties**
 > ```ts
 > directory: string
