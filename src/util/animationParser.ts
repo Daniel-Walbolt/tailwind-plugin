@@ -35,8 +35,12 @@ export type ParsedAnimation = {
 	value: string;
 }
 
+/**
+ * Parses a CSS animation value into a JS object
+ * @param input
+ */
 export default function parseAnimationValue(input: string): Partial<ParsedAnimation>[] {
-	// User can define multiple animations by an animation declaration.
+	// User can define multiple animations in an animation declaration.
 	// Split them up at the commas that exist outside of brackets.
 	let animations: string[] = input.split(COMMA);
 
