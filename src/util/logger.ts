@@ -1,5 +1,5 @@
 /*
-*   This file provides functions to display messages to the user via the console.
+*  This file provides functions to display messages to the user via the console.
 */
 
 const consoleMessagePrefix = '[layer-parser]:';

@@ -7,7 +7,7 @@ import * as Keyframes from "./keyframes";
 import { LayerParserConfig } from "../types";
 
 /**
- * Function for getting the identifier for a rule or atrule.
+ * Gets the identifier for a rule or atrule.
  */
 export function getIdentifier(node: Rule | AtRule)
 {
@@ -28,11 +28,11 @@ export function getIdentifier(node: Rule | AtRule)
 /**
  * Function for manipulating everything on a rule and its nested rules.
  *
- * This method fixes the identation from being in layers.
+ * Fixes the identation from being in layers.
  * 
- * This method searches each rule to find animations, so that the parser can MATCH them to the parent rule.
+ * Searches each rule to find animations, so that the parser can MATCH them to the parent rule.
  * 
- * This method adds a comment to the parent rule to distinguish what file it comes from.
+ * Adds a comment to the parent rule to distinguish what file it comes from.
  * 
  * Recursively calls itself to fix nested rules.
  */

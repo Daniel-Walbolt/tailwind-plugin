@@ -2,7 +2,6 @@
  * This file provides functions to handle parsing keyframes.
  * Keyframes and rules are processed separately, but neeed to be combined at the end of parsing if rules request keyframes.
  */
-
 import { AtRule, Declaration, Result, Rule } from 'postcss';
 import { ComponentMap, MatchedKeyframeMap, MissedKeyframes, UtilityMap } from '../cssParser';
 import { LayerParserConfig, MatchedUtility } from '../types';
@@ -17,6 +16,11 @@ const keyframes: Map<string, AtRule> = new Map();
 // Keyframe name is parsed from animation or animation-name declarations
 const animationRuleQueue: Map<string, { rule: Rule, keyframes: Set<string>}> = new Map();
 
+/**
+ * Clear the saved keyframes and CSS rules.
+ * 
+ * Used everytime before parsing the configured directories so there are no duplicates when adding rules to Tailwind.
+ */
 export function resetData()
 {
     keyframes.clear();
@@ -39,7 +43,7 @@ export function attemptToProcessKeyframe(atRule: AtRule, result: Result, config:
 }
 
 /**
- * Loop through the rules that need keyframes added alongside them.
+ * Associates the parsed keyframes to the rules that reference them.
  * 
  * Populates {@link matchedKeyframes} and {@link missedKeyframes}
  * 
@@ -60,23 +64,8 @@ export function matchKeyframesToRules(matchedKeyframes: MatchedKeyframeMap, comp
 
 		const jsonStringifiedUtility = convertRule(rule, {}, false);
 		
-		// See if the user has defined a name for this animation rule
+		// See if the user has defined a prefix for this animation rule
 		let intellisensePrefix: string = config.animationPrefix;
-		// rule.walkDecls(config.animationDeclarationName, decl => {
-		// 	if (decl != undefined)
-		// 	{
-		// 		// decl.value is what will appear in intellisense.
-		// 		intellisensePrefix = decl.value;
-		// 	}
-		// 	decl.remove();
-		// })
-
-		// if (Object.entries(intellisensePrefix).length == 0)
-		// {
-		// 	let identifier = ruleIdentifier.match(/\w+-?/g).join("-");
-		// 	// The rule identifier is what will appear in intellisense.
-		// 	intellisensePrefix = identifier;
-		// }
 
 		const matchedKeyframe: MatchedUtility = new MatchedUtility({
 			node: rule,

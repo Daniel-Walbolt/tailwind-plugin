@@ -9,7 +9,7 @@
 
 **Layer Parser** lets you autocomplete and preview custom css while utilizing the benefits of TailwindCSS.
 
-This is extremely useful for monorepos using similar styling across several projects. Your custom CSS can be organized in dedicated files to use a more familiar CSS language rather than specifying classes through tailwind's native JSON syntax.
+This is extremely useful for mono-repos using similar styling across several projects. Your custom CSS can be organized in dedicated files to use a more familiar CSS language rather than specifying classes through tailwind's native JSON syntax.
 
 ---
 
@@ -17,6 +17,7 @@ This is extremely useful for monorepos using similar styling across several proj
 
 > **Warning**
 > This is a plugin for TailwindCSS, and can only be used in a project using [TailwindCSS as a PostCSS plugin](https://tailwindcss.com/docs/installation/using-postcss).
+> Note, you should use Tailwind's intellisense plugin in order to see the benefits of this plugin.
 
 ```sh
 npm i tailwind-layer-parser
@@ -81,7 +82,7 @@ module.exports = {
     ],
 };
 ```
-3. If you have configured your target directory properly, your classes should now show up in your intellisense. This requires the TailwiindCSS Intellisense extension to be installed. Only tested in VS code.
+3. If you have configured your target directory properly, your classes should now show up in your intellisense. This requires the TailwindCSS intellisense extension to be installed. Only tested in VS code.
 <div style="display: flex; align-items: center; justify-content: center; gap: 5rem;">
     <img src="./assets/IntellisenseCommentPreview.png" />
     <img src="./assets/KeyframeIntellisensePreview.png"/>
@@ -113,7 +114,7 @@ For those wanting to customize your experience...
 > Utility means all styles not located in a layer are added as utilities.
 > Components means all styles not located in a layer are added as components.
 >
-> Refer to tailwind documentation for the difference between component and utilities.
+> Refer to tailwind documentation for the difference between components and utilities.
 > 
 > Defaults to "Utility".
 >
@@ -142,7 +143,7 @@ For those wanting to customize your experience...
 > - DEBUG - A list of duplicate selectors found in the target directory
 > - ALWAYS - A list of file names that matched the glob patterns but did not end with ".css"
 >
-> Plugin output is located in the output terminal of VS Code, under "Tailwind CSS Intellisense."
+> Plugin output is located in the output terminal of VS Code, under "Tailwind CSS Intellisense".
 > <div style="text-align:center"><img src="./assets/TailwindOutputTerminal.png" /></div>
 >
 > ---
