@@ -107,6 +107,9 @@ function resetData() {
 }
 function attemptToProcessKeyframe(atRule, result, config) {
   if (atRule.name = "keyframes") {
+    if (atRule.parent.type == "rule") {
+      return false;
+    }
     let atRuleIdentifier = getIdentifier(atRule);
     keyframes.set(atRuleIdentifier, atRule);
     return true;

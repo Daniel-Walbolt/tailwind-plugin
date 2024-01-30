@@ -35,6 +35,10 @@ export function attemptToProcessKeyframe(atRule: AtRule, result: Result, config:
 {
     if (atRule.name = 'keyframes')
     {
+		if (atRule.parent.type == "rule") {
+			// This keyframe is nested within a rule. Ignore processing this keyframe because it was intended to be hidden within this class.
+			return false;
+		}
         let atRuleIdentifier = getIdentifier(atRule);
         keyframes.set(atRuleIdentifier, atRule); // Update the map with the newest keyframe
         return true;
