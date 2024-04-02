@@ -4,7 +4,7 @@ import * as Formatter from './util/nodeFormatter';
 export type LayerListObject = {
 	utilities: Node[];
 	components: Node[];
-	keyframeUtilities: MatchedUtility[]
+	keyframeUtilities: MatchedAnimationRule[]
 };
 
 export type LayerLocation = "File" | "Absolute" | "None";
@@ -13,19 +13,8 @@ export type StringifiedJSON = {
     [key: string]: string | StringifiedJSON;
 }
 
-type MatchedUtilityContent = {
+type MatchedAnimationRuleContent = {
 	[intellisensePrefix: string]: (value: string) => (StringifiedJSON | { [key: string]: StringifiedJSON})[];
-}
-
-type MatchedUtilityValues = {
-	/**
-	 * Each KEY is the suffix the user specifies in addition to the prefix defined by the function that assigns CSS nodes {@link MatchedUtilityContent}
-	 * 
-	 * Each VALUE is the VALUE that gets passed into the function that assigns the CSS nodes {@link MatchedUtilityContent}
-	 */
-	values: {
-		[intellisenseSuffix: string]: string
-	}
 }
 
 /**
@@ -38,7 +27,7 @@ type MatchedUtilityValues = {
  * )
  * ```
  */
-export class MatchedUtility {
+export class MatchedAnimationRule {
 	content: MatchedNode<AtRule>[] = [];
 	rule: MatchedNode<Rule>;
 	intellisensePrefix: string;
@@ -52,9 +41,9 @@ export class MatchedUtility {
 	/** 
 	 * Provides all the content for tailwind to process. Defines the suffix used in intellisense and provides the CSS styles.	
 	 */
-	getMatchedContent(): MatchedUtilityContent
+	getMatchedContent(): MatchedAnimationRuleContent
 	{
-		let matcher: MatchedUtilityContent = {};
+		let matcher: MatchedAnimationRuleContent = {};
 		let stringifiedMatches = this.content.map(x => x.stringifiedNode);
 		let contentObject = Object.fromEntries(stringifiedMatches.entries());
 		matcher[this.intellisensePrefix] = (value: string) => {

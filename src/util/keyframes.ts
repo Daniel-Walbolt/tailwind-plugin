@@ -4,7 +4,7 @@
  */
 import { AtRule, Declaration, Result, Rule } from 'postcss';
 import { ComponentMap, MatchedKeyframeMap, MissedKeyframes, UtilityMap } from '../cssParser';
-import { LayerParserConfig, MatchedUtility } from '../types';
+import { LayerParserConfig, MatchedAnimationRule } from '../types';
 import { convertAtRule, convertRule } from './nodeConverter';
 import { getIdentifier } from './nodeFormatter';
 import parseAnimationValue, { ParsedAnimation } from './animationParser';
@@ -23,8 +23,8 @@ const animationRuleQueue: Map<string, { rule: Rule, keyframes: Set<string>}> = n
  */
 export function resetData()
 {
-    keyframes.clear();
-    animationRuleQueue.clear();
+	keyframes.clear();
+	animationRuleQueue.clear();
 }
 
 /**
@@ -33,17 +33,17 @@ export function resetData()
  */
 export function attemptToProcessKeyframe(atRule: AtRule, result: Result, config: LayerParserConfig): boolean
 {
-    if (atRule.name = 'keyframes')
-    {
+	if (atRule.name = 'keyframes')
+	{
 		if (atRule.parent.type == "rule") {
 			// This keyframe is nested within a rule. Ignore processing this keyframe because it was intended to be hidden within this class.
 			return false;
 		}
-        let atRuleIdentifier = getIdentifier(atRule);
-        keyframes.set(atRuleIdentifier, atRule); // Update the map with the newest keyframe
-        return true;
-    }
-    return false;
+		let atRuleIdentifier = getIdentifier(atRule);
+		keyframes.set(atRuleIdentifier, atRule); // Update the map with the newest keyframe
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -71,7 +71,7 @@ export function matchKeyframesToRules(matchedKeyframes: MatchedKeyframeMap, comp
 		// See if the user has defined a prefix for this animation rule
 		let intellisensePrefix: string = config.animationPrefix;
 
-		const matchedKeyframe: MatchedUtility = new MatchedUtility({
+		const matchedKeyframe: MatchedAnimationRule = new MatchedAnimationRule({
 			node: rule,
 			stringifiedNode: jsonStringifiedUtility
 		}, intellisensePrefix);

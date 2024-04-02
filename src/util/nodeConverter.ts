@@ -12,7 +12,7 @@ export function convertDeclartion (declaration: Declaration, formattedObject: St
 	return formattedObject;
 }
 
-/** Converts and rule, and its nested rules into stringified JSON */
+/** Converts a rule and its nested rules into stringified JSON for compatability with TailwindCSS config syntax */
 export function convertRule (
 	rule: Rule, 
 	/** 
@@ -62,20 +62,24 @@ export function convertAtRule (atRule: AtRule, formattedObject: StringifiedJSON 
 	{
 		let convertedAtRule: StringifiedJSON = {};
 
-		for (const node of atRule.nodes)
-		{
-			if (node.type === 'decl')
+		// Check that the AtRule has nodes that can be iterated over.
+		// Namely, @apply does NOT have iterable nodes.
+		if (atRule.nodes?.[Symbol.iterator]) {
+			for (const node of atRule.nodes)
 			{
-				convertedAtRule = convertDeclartion(node, convertedAtRule);
-			}
-			else if (node.type === 'rule')
-			{
-				convertedAtRule = convertRule(node, convertedAtRule);
-			}
-			else if (node.type === 'atrule')
-			{
-				// Don't know why an atrule would be in another atrule...
-				convertedAtRule = convertAtRule(node, convertedAtRule);
+				if (node.type === 'decl')
+				{
+					convertedAtRule = convertDeclartion(node, convertedAtRule);
+				}
+				else if (node.type === 'rule')
+				{
+					convertedAtRule = convertRule(node, convertedAtRule);
+				}
+				else if (node.type === 'atrule')
+				{
+					// Don't know why an atrule would be in another atrule...
+					convertedAtRule = convertAtRule(node, convertedAtRule);
+				}
 			}
 		}
 		formattedObject[`@${atRule.name} ${atRule.params}`] = convertedAtRule;
