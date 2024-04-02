@@ -3,14 +3,14 @@ import { Node, AtRule, Rule } from 'postcss';
 type LayerListObject = {
     utilities: Node[];
     components: Node[];
-    keyframeUtilities: MatchedUtility[];
+    keyframeUtilities: MatchedAnimationRule[];
 };
 type LayerLocation = "File" | "Absolute" | "None";
 type UnlayeredClassBehavior = "Ignore" | "Component" | "Utility";
 type StringifiedJSON = {
     [key: string]: string | StringifiedJSON;
 };
-type MatchedUtilityContent = {
+type MatchedAnimationRuleContent = {
     [intellisensePrefix: string]: (value: string) => (StringifiedJSON | {
         [key: string]: StringifiedJSON;
     })[];
@@ -25,7 +25,7 @@ type MatchedUtilityContent = {
  * )
  * ```
  */
-declare class MatchedUtility {
+declare class MatchedAnimationRule {
     content: MatchedNode<AtRule>[];
     rule: MatchedNode<Rule>;
     intellisensePrefix: string;
@@ -33,7 +33,7 @@ declare class MatchedUtility {
     /**
      * Provides all the content for tailwind to process. Defines the suffix used in intellisense and provides the CSS styles.
      */
-    getMatchedContent(): MatchedUtilityContent;
+    getMatchedContent(): MatchedAnimationRuleContent;
     /** Provides the suffixes that CAN be used with the prefix.
      * These suffixes can provide values that can manipulate the stylings, but this plugin doesn't support those yet.
      * ```
@@ -125,4 +125,4 @@ declare function ParseCSS(config: LayerParserConfig): ({ addUtilities, addCompon
     matchUtilities: any;
 }) => void;
 
-export { LayerListObject, LayerLocation, LayerParserConfig, MatchedNode, MatchedUtility, ParseCSS, StringifiedJSON, UnlayeredClassBehavior, CSSParser as cssParser, resetData };
+export { LayerListObject, LayerLocation, LayerParserConfig, MatchedAnimationRule, MatchedNode, ParseCSS, StringifiedJSON, UnlayeredClassBehavior, CSSParser as cssParser, resetData };

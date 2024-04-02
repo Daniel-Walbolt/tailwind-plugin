@@ -26,15 +26,18 @@ function convertRule(rule, formattedObject = {}, includeRuleSelector = true) {
   }
 }
 function convertAtRule(atRule, formattedObject = {}) {
+  var _a;
   if (atRule.type === "atrule") {
     let convertedAtRule = {};
-    for (const node of atRule.nodes) {
-      if (node.type === "decl") {
-        convertedAtRule = convertDeclartion(node, convertedAtRule);
-      } else if (node.type === "rule") {
-        convertedAtRule = convertRule(node, convertedAtRule);
-      } else if (node.type === "atrule") {
-        convertedAtRule = convertAtRule(node, convertedAtRule);
+    if ((_a = atRule.nodes) == null ? void 0 : _a[Symbol.iterator]) {
+      for (const node of atRule.nodes) {
+        if (node.type === "decl") {
+          convertedAtRule = convertDeclartion(node, convertedAtRule);
+        } else if (node.type === "rule") {
+          convertedAtRule = convertRule(node, convertedAtRule);
+        } else if (node.type === "atrule") {
+          convertedAtRule = convertAtRule(node, convertedAtRule);
+        }
       }
     }
     formattedObject[`@${atRule.name} ${atRule.params}`] = convertedAtRule;
@@ -124,7 +127,7 @@ function matchKeyframesToRules(matchedKeyframes2, components2, utilities2, misse
     utilities2.delete(ruleIdentifier);
     const jsonStringifiedUtility = convertRule(rule, {}, false);
     let intellisensePrefix = config.animationPrefix;
-    const matchedKeyframe = new MatchedUtility({
+    const matchedKeyframe = new MatchedAnimationRule({
       node: rule,
       stringifiedNode: jsonStringifiedUtility
     }, intellisensePrefix);
@@ -236,7 +239,7 @@ ${selectorIndents}`);
 }
 
 // src/types.ts
-var MatchedUtility = class {
+var MatchedAnimationRule = class {
   constructor(rule, intellisenseValue) {
     this.content = [];
     this.rule = rule;
@@ -548,7 +551,7 @@ function ParseCSS(config) {
   };
 }
 export {
-  MatchedUtility,
+  MatchedAnimationRule,
   ParseCSS,
   CSSParser as cssParser,
   resetData2 as resetData
