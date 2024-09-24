@@ -13,8 +13,7 @@
 		"bundle-size": "npm pack && tar -xvzf *.tgz && rm -rf package *.tgz"
 	},
 	"files": [
-		"dist",
-		"assets"
+		"dist"
 	],
 	"keywords": [
 		"Tailwind",
