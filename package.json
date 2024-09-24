@@ -9,7 +9,8 @@
 	"scripts": {
 		"build": "tsup src/index.ts --format cjs,esm --dts --minify",
 		"lint": "tsc",
-		"release": "npm run lint && npm run build && npm publish"
+		"release": "npm run lint && npm run build && npm publish",
+		"bundle-size": "npm pack && tar -xvzf *.tgz && rm -rf package *.tgz"
 	},
 	"files": [
 		"dist",
