@@ -12,8 +12,7 @@
 		"release": "npm run lint && npm run build && npm publish"
 	},
 	"files": [
-		"dist",
-		"assets"
+		"dist"
 	],
 	"keywords": [
 		"Tailwind",

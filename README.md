@@ -84,8 +84,8 @@ module.exports = {
 ```
 3. If you have configured your target directory properly, your classes should now show up in your intellisense. This requires the TailwindCSS intellisense extension to be installed. Only tested in VS code.
 <div style="display: flex; align-items: center; justify-content: center; gap: 5rem;">
-    <img src="./assets/IntellisenseCommentPreview.png" />
-    <img src="./assets/KeyframeIntellisensePreview.png"/>
+    <img src="https://github.com/Daniel-Walbolt/tailwind-plugin/blob/main/assets/IntellisenseCommentPreview.png?raw=true" />
+    <img src="https://github.com/Daniel-Walbolt/tailwind-plugin/blob/main/assets/KeyframeIntellisensePreview.png?raw=true" />
 </div>
 
 ## Configuration
@@ -144,7 +144,7 @@ For those wanting to customize your experience...
 > - ALWAYS - A list of file names that matched the glob patterns but did not end with ".css"
 >
 > Plugin output is located in the output terminal of VS Code, under "Tailwind CSS Intellisense".
-> <div style="text-align:center"><img src="./assets/TailwindOutputTerminal.png" /></div>
+> <div style="text-align:center"><img src="https://github.com/Daniel-Walbolt/tailwind-plugin/blob/main/assets/TailwindOutputTerminal.png?raw=true" /></div>
 >
 > ---
 > ```ts
@@ -162,7 +162,7 @@ For those wanting to customize your experience...
 > Defaults to false.
 > 
 > Basically Allman style for CSS rules when set to true.
-> <div style="text-align:center"><img src="./assets/IntellisenseAllmanStylePreview.png" /></div>
+> <div style="text-align:center"><img src="https://github.com/Daniel-Walbolt/tailwind-plugin/blob/main/assets/IntellisenseAllmanStylePreview.png?raw=true" /></div>
 >
 > ---
 >
