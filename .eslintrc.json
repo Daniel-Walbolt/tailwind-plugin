@@ -1,28 +1,85 @@
 {
-  "env": {
-    "browser": true,
-    "es2021": true
-  },
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:vue/vue3-essential"
-  ],
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "parser": "@typescript-eslint/parser",
-    "sourceType": "module"
-  },
-  "plugins": ["@typescript-eslint", "vue"],
-  "rules": {
-    "max-len": {
-      "code": 145
-    },
-    "brace-style": ["error", "allman", { "allowSingleLine": true }],
-    "indent": ["error", "tab"],
-    "no-var": "error",
-    "linebreak-style": ["error", "windows"],
-    "quotes": ["error", "single"],
-    "semi": ["error", "always"]
-  }
+	"env": {
+		"browser": true,
+		"amd": true,
+		"node": true
+	},
+	"extends": [
+		"eslint:recommended",
+		"plugin:vue/base",
+		"plugin:@typescript-eslint/recommended"
+	],
+	"rules": {
+		"no-alert": "error",
+		"@typescript-eslint/no-unused-vars": "warn",
+		"@typescript-eslint/no-var-requires": "off",
+		"@typescript-eslint/no-explicit-any": "off", // sometimes you just need to type it as any
+		"@typescript-eslint/ban-types": "off",
+		"no-undef": "off", // Allow for declaration of undefined variables (so they can define them later)
+		/** Rules for controlling JavaScript code */
+		"brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+		"semi": ["error", "always"], // enforces using at least 1 semi to end an expression
+		"no-extra-semi": "error", // where possible, enforces use of only 1 semi to end an expression
+		"no-trailing-spaces": ["error", { "ignoreComments": true }],
+		"max-len": ["error", { "code": 140, "tabWidth": 4, "ignoreUrls": true, "ignoreRegExpLiterals": true }],
+		"array-element-newline": ["error", {
+			"multiline": true,
+			"minItems": 3
+		}],
+		"indent": ["error", "tab", {
+			"SwitchCase": 1
+		}],
+		"array-bracket-spacing": ["error", "always", { "arraysInArrays": false, "objectsInArrays": false, "singleValue": false }],
+		"array-bracket-newline": ["error", { "multiline": true, "minItems": 3 }],
+		"arrow-spacing": ["error", { "before": true, "after": true }],
+		"block-spacing": ["error", "always"],
+		"comma-spacing": ["error", { "before": false, "after": true }],
+		"space-in-parens": ["error", "never"],
+		"function-call-argument-newline": ["error", "consistent"],
+		"implicit-arrow-linebreak": ["error", "beside"],
+		"key-spacing": ["error", { "beforeColon": false, "afterColon": true, "mode": "strict" }],
+		"keyword-spacing": ["error", { "before": true, "after": true }], // Spacing after if and before else
+		"line-comment-position": ["error", "above"], // enforces line comments to be on their own line
+		"linebreak-style": ["error", "unix"], // encorce \n line breaks (LF)
+		"new-parens": ["error", "always"], // enforces using () when calling a constructor with no arguments
+		"newline-per-chained-call": ["error", { "ignoreChainWithDepth": 2 }],
+		"no-floating-decimal": "error", // enforces not having trailing or leading decimals for numbers
+		"no-mixed-spaces-and-tabs": "error",
+		"no-multi-spaces": "error", // disallow unnecessary extra spaces
+		"no-multiple-empty-lines": ["error", { "max": 2 }], // disallow more than 2 consecutive empty lines
+		"no-tabs": "off", // turn off the no-tabs rule, we want tabs
+		"no-whitespace-before-property": "error", // enforces no space between accessing properties on an object
+		"nonblock-statement-body-position": ["error", "beside"], // for single line block statements, requires them to be inline
+		"object-curly-newline": ["error", { "consistent": true, "minProperties": 4 }],
+		"object-curly-spacing": ["error", "always"],
+		"no-async-promise-executor": "off",
+		"no-unused-vars": "off",
+		"padded-blocks": ["error", "never"],
+		"space-before-blocks": ["error", "always"],
+		"space-before-function-paren": "off", // turned off because TypeScript function types will usually have spaces before the parenthesis
+		"space-infix-ops": ["error", { "int32Hint": true }], // enforce use of one space around operators
+		"switch-colon-spacing": ["error", { "before": false, "after": true }],
+		"template-curly-spacing": ["error", "always"], // enforce using spaces when using interpolation with `${}`
+		"dot-location": ["error", "property"], // enforces the dot to be infront of the property when accessing objects on a multiline
+		"func-call-spacing": ["error", "never"]
+	},
+	"overrides": [
+		{
+			"files": ["*.vue"],
+			"rules": {
+				"indent": "off" // turn this off because vue/script-indent will have more context with the script tag
+			}
+		}
+	],
+	"plugins": [
+		"vue",
+		"@typescript-eslint"
+	],
+	"parser": "vue-eslint-parser",
+	"parserOptions": {
+		"parser": "@typescript-eslint/parser",
+		"sourceType": "module",
+		"ecmaVersion": 6
+	},
+	"root": true
 }

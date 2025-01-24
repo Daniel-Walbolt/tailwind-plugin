@@ -8,31 +8,26 @@ import { resetData, CSSParser } from './cssParser';
  * 
  * Call this method in TailwindCSS's plugin()
  */
-function ParseCSS(config: LayerParserConfig) 
-{
-	return ({ addUtilities, addComponents, matchUtilities }) => 
-	{
+function ParseCSS(config: LayerParserConfig) {
+	return ({ addUtilities, addComponents, matchUtilities }) => {
 		resetData();
 		const classes = CSSParser(config);
 
-		for (const utility of classes.utilities) 
-		{
+		for (const utility of classes.utilities) {
 			addUtilities(utility);
 		}
 
-		for (const component of classes.components) 
-		{
+		for (const component of classes.components) {
 			addComponents(component);
 		}
 
-		for (const matchedKeyframe of classes.keyframeUtilities)
-		{
+		for (const matchedKeyframe of classes.keyframeUtilities) {
 			matchUtilities(
 				matchedKeyframe.getMatchedContent(),
 				matchedKeyframe.getMatchedValues()
-			)
+			);
 		}
 	};
 }
 
-export { resetData, CSSParser as cssParser, ParseCSS};
+export { resetData, CSSParser as cssParser, ParseCSS };

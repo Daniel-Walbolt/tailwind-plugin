@@ -1,9 +1,14 @@
 /*
  * This file provides functions to handle parsing keyframes.
- * Keyframes and rules are processed separately, but neeed to be combined at the end of parsing if rules request keyframes.
+ * Keyframes and rules are processed separately, but need to be combined at the end of parsing if rules request keyframes.
  */
-import { AtRule, Declaration, Result, Rule } from 'postcss';
-import { ComponentMap, MatchedKeyframeMap, MissedKeyframes, UtilityMap } from '../cssParser';
+
+import {
+	AtRule, Declaration, Result, Rule
+} from 'postcss';
+import {
+	ComponentMap, MatchedKeyframeMap, MissedKeyframes, UtilityMap
+} from '../cssParser';
 import { LayerParserConfig, MatchedAnimationRule } from '../types';
 import { convertAtRule, convertRule } from './nodeConverter';
 import { getIdentifier } from './nodeFormatter';
@@ -12,17 +17,19 @@ import parseAnimationValue, { ParsedAnimation } from './animationParser';
 // Store the processed keyframes
 const keyframes: Map<string, AtRule> = new Map();
 
-// Store the queue for keyframes requested by rules. Each key is a rule identifier which stores the rule and the names of the keyframes it needs.
-// Keyframe name is parsed from animation or animation-name declarations
+/**
+ * Store the queue for keyframes requested by rules.
+ * Each key is a rule identifier which stores the rule and the names of the keyframes it needs.
+ * Keyframe name is parsed from animation or animation-name declarations
+ */
 const animationRuleQueue: Map<string, { rule: Rule, keyframes: Set<string>}> = new Map();
 
 /**
  * Clear the saved keyframes and CSS rules.
  * 
- * Used everytime before parsing the configured directories so there are no duplicates when adding rules to Tailwind.
+ * Used every time before parsing the configured directories so there are no duplicates when adding rules to Tailwind.
  */
-export function resetData()
-{
+export function resetData() {
 	keyframes.clear();
 	animationRuleQueue.clear();
 }
@@ -31,16 +38,16 @@ export function resetData()
  * Attempts to process the provided atRule as a keyframe.
  * @returns true if it was processed, false otherwise
  */
-export function attemptToProcessKeyframe(atRule: AtRule, result: Result, config: LayerParserConfig): boolean
-{
-	if (atRule.name = 'keyframes')
-	{
+export function attemptToProcessKeyframe(atRule: AtRule, result: Result, config: LayerParserConfig): boolean {
+	if (atRule.name === 'keyframes') {
 		if (atRule.parent.type == "rule") {
-			// This keyframe is nested within a rule. Ignore processing this keyframe because it was intended to be hidden within this class.
+			// This keyframe is nested within a rule.
+			// Ignore processing this keyframe because it was intended to be hidden within this class.
 			return false;
 		}
-		let atRuleIdentifier = getIdentifier(atRule);
-		keyframes.set(atRuleIdentifier, atRule); // Update the map with the newest keyframe
+		const atRuleIdentifier = getIdentifier(atRule);
+		// Update the map with the newest keyframe
+		keyframes.set(atRuleIdentifier, atRule);
 		return true;
 	}
 	return false;
@@ -53,12 +60,15 @@ export function attemptToProcessKeyframe(atRule: AtRule, result: Result, config:
  * 
  * Should be called after all debugging of utilities and components
  */
-export function matchKeyframesToRules(matchedKeyframes: MatchedKeyframeMap, components: ComponentMap, utilities: UtilityMap, missedKeyframes: MissedKeyframes, config: LayerParserConfig)
-{
+export function matchKeyframesToRules(
+	matchedKeyframes: MatchedKeyframeMap,
+	components: ComponentMap,
+	utilities: UtilityMap,
+	missedKeyframes: MissedKeyframes,
+	config: LayerParserConfig
+) {
 	// Loop through the rules that need keyframes
-	for (const [ruleIdentifier, ruleAndKeyframes] of animationRuleQueue.entries())
-	{
-
+	for (const [ ruleIdentifier, ruleAndKeyframes ] of animationRuleQueue.entries()) {
 		// Get the current rule that needs keyframes matched to it
 		const rule = ruleAndKeyframes.rule;
 
@@ -67,9 +77,9 @@ export function matchKeyframesToRules(matchedKeyframes: MatchedKeyframeMap, comp
 		utilities.delete(ruleIdentifier);
 
 		const jsonStringifiedUtility = convertRule(rule, {}, false);
-		
+
 		// See if the user has defined a prefix for this animation rule
-		let intellisensePrefix: string = config.animationPrefix;
+		const intellisensePrefix: string = config.animationPrefix;
 
 		const matchedKeyframe: MatchedAnimationRule = new MatchedAnimationRule({
 			node: rule,
@@ -77,17 +87,14 @@ export function matchKeyframesToRules(matchedKeyframes: MatchedKeyframeMap, comp
 		}, intellisensePrefix);
 
 		// Loop through each of the keyframes that this rule needs to be matched with
-		for (const keyframeIdentifier of ruleAndKeyframes.keyframes)
-		{
+		for (const keyframeIdentifier of ruleAndKeyframes.keyframes) {
 			// Attempt to get the keyframe from the list of found @keyframes
-			let keyframe: AtRule | undefined = keyframes.get(keyframeIdentifier);
-			
-			if (keyframe == undefined)
-			{
+			const keyframe: AtRule | undefined = keyframes.get(keyframeIdentifier);
+
+			if (keyframe == undefined) {
 				// Track the keyframes that were requested, but were not found
-				let missedKeyframeSet = missedKeyframes.get(keyframeIdentifier) ?? new Set()
-				if (!missedKeyframeSet.has(rule.selector))
-				{
+				const missedKeyframeSet = missedKeyframes.get(keyframeIdentifier) ?? new Set();
+				if (!missedKeyframeSet.has(rule.selector)) {
 					missedKeyframeSet.add(rule.selector);
 				}
 				continue;
@@ -102,7 +109,6 @@ export function matchKeyframesToRules(matchedKeyframes: MatchedKeyframeMap, comp
 		}
 
 		matchedKeyframes.set(ruleIdentifier, matchedKeyframe);
-
 	}
 }
 
@@ -110,43 +116,39 @@ export function matchKeyframesToRules(matchedKeyframes: MatchedKeyframeMap, comp
  * Check if the declaration references a keyframe, and if so, handle how to track it.
  * @returns true if the animation was registered
  */
-export function registerAnimationDeclaration(declaration: Declaration, topParentRule: Rule): boolean
-{
-	if (declaration.prop == 'animation')
-	{
+export function registerAnimationDeclaration(declaration: Declaration, topParentRule: Rule): boolean {
+	if (declaration.prop == 'animation') {
 		const ruleIdentifier = getIdentifier(topParentRule);
-		const parseResult: Partial<ParsedAnimation>[] = parseAnimationValue(declaration.value);  // Returns a list of objects
+		// Returns a list of objects
+		const parseResult: Partial<ParsedAnimation>[] = parseAnimationValue(declaration.value);
 		let addedAnimation = false;
-		for (let parsedAnimationValue of parseResult)
-		{
-			const animationName = parsedAnimationValue.name
-			if (animationName == undefined)
-			{
+		for (const parsedAnimationValue of parseResult) {
+			const animationName = parsedAnimationValue.name;
+			if (animationName == undefined) {
 				continue;
 			}
 
 			// Get the object linking a rule to keyframes
-			const ruleAndKeyframes = animationRuleQueue.get(ruleIdentifier) ?? { rule: topParentRule, keyframes: new Set<string>() }
-			if (!ruleAndKeyframes.keyframes.has(animationName))
-			{
-				ruleAndKeyframes.keyframes.add(`@keyframes ${animationName}`); // Add immediate parent to the list of keyframes this rule needs
+			const ruleAndKeyframes = animationRuleQueue.get(ruleIdentifier) ?? { rule: topParentRule, keyframes: new Set<string>() };
+			if (!ruleAndKeyframes.keyframes.has(animationName)) {
+				// Add immediate parent to the list of keyframes this rule needs
+				ruleAndKeyframes.keyframes.add(`@keyframes ${ animationName }`);
 			}
 			animationRuleQueue.set(ruleIdentifier, ruleAndKeyframes);
 			addedAnimation = true;
 		}
 		return addedAnimation;
-	}
-	else if (declaration.prop == 'animation-name')
-	{
+	} else if (declaration.prop == 'animation-name') {
 		const ruleIdentifier = getIdentifier(topParentRule);
-		const ruleAndKeyframes = animationRuleQueue.get(ruleIdentifier) ?? { rule: topParentRule, keyframes: new Set<string>() }
-		if (!ruleAndKeyframes.keyframes.has(declaration.value))
-		{
-			ruleAndKeyframes.keyframes.add(`@keyframes ${declaration.value}`); // Add this keyframe to the list this rule needs
+		const ruleAndKeyframes = animationRuleQueue.get(ruleIdentifier) ?? { rule: topParentRule, keyframes: new Set<string>() };
+		if (!ruleAndKeyframes.keyframes.has(declaration.value)) {
+			// Add this keyframe to the list this rule needs
+			ruleAndKeyframes.keyframes.add(`@keyframes ${ declaration.value }`);
 		}
-		animationRuleQueue.set(ruleIdentifier, ruleAndKeyframes); // This needs to match the identifier that gets put into the keyframes map.	
-		return true;		
+		// This needs to match the identifier that gets put into the keyframes map.
+		animationRuleQueue.set(ruleIdentifier, ruleAndKeyframes);
+		return true;
 	}
-	
+
 	return false;
 }

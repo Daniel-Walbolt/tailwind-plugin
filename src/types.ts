@@ -32,8 +32,7 @@ export class MatchedAnimationRule {
 	rule: MatchedNode<Rule>;
 	intellisensePrefix: string;
 
-	constructor (rule: MatchedNode<Rule>, intellisenseValue: string)
-	{
+	constructor (rule: MatchedNode<Rule>, intellisenseValue: string) {
 		this.rule = rule;
 		this.intellisensePrefix = intellisenseValue;
 	}
@@ -41,30 +40,27 @@ export class MatchedAnimationRule {
 	/** 
 	 * Provides all the content for tailwind to process. Defines the suffix used in intellisense and provides the CSS styles.	
 	 */
-	getMatchedContent(): MatchedAnimationRuleContent
-	{
-		let matcher: MatchedAnimationRuleContent = {};
-		let stringifiedMatches = this.content.map(x => x.stringifiedNode);
-		let contentObject = Object.fromEntries(stringifiedMatches.entries());
-		matcher[this.intellisensePrefix] = (value: string) => {
-			return [
-				contentObject,
-				this.rule.stringifiedNode
-			]
-		}
+	getMatchedContent(): MatchedAnimationRuleContent {
+		const matcher: MatchedAnimationRuleContent = {};
+		const stringifiedMatches = this.content.map(x => x.stringifiedNode);
+		const contentObject = Object.fromEntries(stringifiedMatches.entries());
+		matcher[this.intellisensePrefix] = () => {
+			return [ contentObject, this.rule.stringifiedNode ];
+		};
 		return matcher;
-	};
+	}
 	/** Provides the suffixes that CAN be used with the prefix.
 	 * These suffixes can provide values that can manipulate the stylings, but this plugin doesn't support those yet.
 	 * ```
 	 * .{prefix}-{suffix}
 	 * ```
 	*/
-	getMatchedValues(): { values: {[intellisenseSuffix: string]: string} }
-	{
-		let suffixes: { [key: string]: string } = {};
-		// Get the identifier of the rule, and select all the word characters and dashes. If multiple words are matched in the identifier (i.e. .sample,.test -> sample-test)
-		let identifier = Formatter.getIdentifier(this.rule.node).match(/\w+/g).join("-");
+	getMatchedValues(): { values: {[intellisenseSuffix: string]: string} } {
+		const suffixes: { [key: string]: string } = {};
+		// Get the identifier of the rule, and select all the word characters and dashes.
+		// If multiple words are matched in the identifier (i.e. .sample,.test -> sample-test)
+		const identifier = Formatter.getIdentifier(this.rule.node).match(/\w+/g)
+			.join("-");
 		suffixes[identifier] = '';
 		return {
 			values: suffixes
@@ -126,11 +122,13 @@ export type LayerParserConfig = {
 	openBracketNewLine: boolean;
 
 	/**
-	 * The prefix to use for matching keyframes to rules. Due to the way tailwind expects plugins to group keyframes with rules, it requires a {prefix}-{suffix} combination.
+	 * The prefix to use for matching keyframes to rules.
+	 * Due to the way tailwind expects plugins to group keyframes with rules, it requires a {prefix}-{suffix} combination.
 	 * 
 	 * The suffix will always be the name of the TOP MOST rule referencing keyframes.
 	 * 
-	 * This property defines the prefix, can NOT be undefined or blank. Defaults to "animate", just like tailwind's other animate classes (i.e. ```animate-ping```).
+	 * This property defines the prefix, and can NOT be undefined or blank.
+	 * Defaults to "animate", just like tailwind's other animate classes (i.e. ```animate-ping```).
 	 */
 	animationPrefix: string;
 };
