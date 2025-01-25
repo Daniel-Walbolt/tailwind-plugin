@@ -1,9 +1,9 @@
-import { AtRule, Node, Rule } from 'postcss';
+import { AtRule, Rule } from 'postcss';
 import * as Formatter from './util/nodeFormatter';
 
 export type LayerListObject = {
-	utilities: Node[];
-	components: Node[];
+	utilities: Rule[];
+	components: Rule[];
 	keyframeUtilities: MatchedAnimationRule[]
 };
 

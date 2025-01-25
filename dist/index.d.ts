@@ -1,8 +1,8 @@
-import { Node, AtRule, Rule } from 'postcss';
+import { Rule, AtRule } from 'postcss';
 
 type LayerListObject = {
-    utilities: Node[];
-    components: Node[];
+    utilities: Rule[];
+    components: Rule[];
     keyframeUtilities: MatchedAnimationRule[];
 };
 type LayerLocation = "File" | "Absolute" | "None";
@@ -93,11 +93,13 @@ type LayerParserConfig = {
      */
     openBracketNewLine: boolean;
     /**
-     * The prefix to use for matching keyframes to rules. Due to the way tailwind expects plugins to group keyframes with rules, it requires a {prefix}-{suffix} combination.
+     * The prefix to use for matching keyframes to rules.
+     * Due to the way tailwind expects plugins to group keyframes with rules, it requires a {prefix}-{suffix} combination.
      *
      * The suffix will always be the name of the TOP MOST rule referencing keyframes.
      *
-     * This property defines the prefix, can NOT be undefined or blank. Defaults to "animate", just like tailwind's other animate classes (i.e. ```animate-ping```).
+     * This property defines the prefix, and can NOT be undefined or blank.
+     * Defaults to "animate", just like tailwind's other animate classes (i.e. ```animate-ping```).
      */
     animationPrefix: string;
 };

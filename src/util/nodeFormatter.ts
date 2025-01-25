@@ -57,6 +57,7 @@ export function formatNode(node: Rule | AtRule, config: LayerParserConfig, resul
 	//#region Format the selectors for rules and parameters for AtRules
 	if (node.type === 'rule') {
 		const rule = node as Rule;
+		// Format the selectors to each appear on their own line.
 		const formattedSelectors = rule.selectors.join(`,\n${ selectorIndents }`);
 		rule.selector = formattedSelectors;
 		rule.raws.between = desiredBetween;

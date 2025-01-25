@@ -13,12 +13,19 @@ function ParseCSS(config: LayerParserConfig) {
 		resetData();
 		const classes = CSSParser(config);
 
+		console.log("Utilities:", classes.utilities.length, "Components:", classes.components.length);
+
 		for (const utility of classes.utilities) {
-			addUtilities(utility);
+			console.log(utility.toString(),"\n");
+			addUtilities(utility.toString());
 		}
 
 		for (const component of classes.components) {
-			addComponents(component);
+			addComponents({
+				'.test-class': {
+					'background-color': 'green'
+				}
+			});
 		}
 
 		for (const matchedKeyframe of classes.keyframeUtilities) {

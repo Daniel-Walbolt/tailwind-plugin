@@ -278,15 +278,19 @@ export function CSSParser(config: LayerParserConfig): LayerListObject {
 	let parseFile: (fileName: string, fullPath: string) => void;
 	switch (config.commentType) {
 		case "Absolute":
-			parseFile = (fileName: string, fullPath: string) => {
+			parseFile = (_: string, fullPath: string) => {
 				const file = readFileSync(fullPath, 'utf8');
-				processor.process(file, { from: fullPath, to: fullPath });
+				processor.process(file, { from: fullPath, to: fullPath })
+					// For some reason, .then() is required to make the processor work.
+					.then();
 			};
 			break;
 		default:
 			parseFile = (fileName: string, fullPath: string) => {
 				const file = readFileSync(fullPath, 'utf8');
-				processor.process(file, { from: fileName, to: fileName });
+				processor.process(file, { from: fileName, to: fileName })
+					// For some reason, .then() is required to make the processor work.
+					.then();
 			};
 			break;
 	}
