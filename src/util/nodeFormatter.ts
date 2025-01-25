@@ -4,7 +4,7 @@
 
 import { AtRule, Result, Rule } from "postcss";
 import * as Keyframes from "./keyframes";
-import { LayerParserConfig } from "../types";
+import { FormattedRule, LayerParserConfig } from "../types";
 
 /**
  * Gets the identifier for a rule or atrule.
@@ -32,12 +32,18 @@ export function getIdentifier(node: Rule | AtRule) {
  *
  * Recursively calls itself to fix nested rules.
  */
-export function formatNode(node: Rule | AtRule, config: LayerParserConfig, result: Result, originalParentRule?: Rule, nesting = 1) {
+export function formatNode(
+	node: Rule | AtRule,
+	config: LayerParserConfig,
+	result: Result,
+	originalParentRule?: Rule,
+	nesting = 1
+): FormattedRule | undefined {
 	if (node.nodes == undefined || node.nodes.length == 0) {
 		return;
 	}
 
-	// The indent for inside curly braces
+	// The indent for inside the node's curly braces
 	let innerIndent = '';
 
 	// The indent for multi-line selectors.

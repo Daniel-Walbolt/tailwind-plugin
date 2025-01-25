@@ -23,7 +23,7 @@ function ParseCSS(config: LayerParserConfig) {
 		for (const component of classes.components) {
 			addComponents({
 				'.test-class': {
-					'background-color': 'green'
+					'transition': 'background-color,\ncolor,\ndisplay'
 				}
 			});
 		}

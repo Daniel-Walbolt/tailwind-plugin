@@ -1,7 +1,7 @@
 {
 	"name": "tailwind-layer-parser",
-	"version": "1.0",
-	"description": "Provides tools to parse your custom .css files, format them, and add them to TailwindCSS's utility and component buckets.",
+	"version": "0.7.3",
+	"description": "Provides tools to parse your custom .css files, format them, and add them to TailwindCSS's utility and component style lists.",
 	"private": false,
 	"main": "./dist/index.js",
 	"module": "./dist/index.mjs",
@@ -9,11 +9,11 @@
 	"scripts": {
 		"build": "tsup src/index.ts --format cjs,esm --dts --minify",
 		"lint": "tsc",
-		"release": "npm run lint && npm run build && npm publish",
-		"bundle-size": "npm pack && tar -xvzf *.tgz && rm -rf package *.tgz"
+		"release": "npm run lint && npm run build && npm publish"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"assets"
 	],
 	"keywords": [
 		"Tailwind",
@@ -32,19 +32,22 @@
 	"homepage": "https://github.com/Daniel-Walbolt/tailwind-plugin#tailwind-layer-parser",
 	"bugs": "https://github.com/Daniel-Walbolt/tailwind-plugin/issues",
 	"devDependencies": {
-		"@types/node": "^20.17.16",
-		"@typescript-eslint/eslint-plugin": "^5.62.0",
-		"@typescript-eslint/parser": "^5.62.0",
-		"eslint": "^8.57.1",
-		"eslint-plugin-vue": "^9.32.0",
+		"@types/node": "^20.3.1",
+		"@typescript-eslint/eslint-plugin": "^5.59.11",
+		"@typescript-eslint/parser": "^5.59.11",
+		"eslint": "^8.43.0",
+		"eslint-config-prettier": "^8.8.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"eslint-plugin-vue": "^9.14.1",
 		"path": "^0.12.7",
 		"tsup": "^6.7.0",
-		"typescript": "^5.7.3",
-		"vue-eslint-parser": "^9.4.3"
+		"typescript": "^5.1.3",
+		"prettier": "^2.8.8",
+		"vue-eslint-parser": "^9.3.1"
 	},
 	"dependencies": {
-		"glob": "^10.4.5",
+		"glob": "^10.2.7",
 		"path": "^0.12.7",
-		"postcss": "^8.5.1"
+		"postcss": "^8.4.24"
 	}
 }

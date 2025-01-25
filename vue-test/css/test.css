@@ -1,0 +1,5 @@
+@layer components {
+	.test-class {
+		background-color: red;
+	}
+}

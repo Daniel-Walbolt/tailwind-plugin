@@ -16,4 +16,6 @@ ${o}`);r.selector=u,r.raws.between=a}else if(e.type=="atrule"){let r=e;r.params=
 	${M}`;for(let[y,g]of p)a+=`${A(2)}${y} - ${g}`,r+=g}let u=`Found ${r} rules with selectors that were already used.
 			Note, this only discovers root-level (not nested) duplicates that would be added based on the configuration.`;e.debug&&(u+=a),f(u)}if(U(L,d,c,T,e),T.size>0){let a="",r=0;for(let[M,p]of T){a+=`
 	${M}`,r+=p.size;for(let y of p)a+=`${A(2)}${y}`}let u=`Could not find ${r} keyframes that were referenced by the searched CSS files.`;e.debug&&(u+=a),f(u)}return{utilities:Array.from(c.values()),components:Array.from(d.values()),keyframeUtilities:Array.from(L.values())}}function Le(e){return({addUtilities:t,addComponents:i,matchUtilities:s})=>{G();let n=V(e);console.log("Utilities:",n.utilities.length,"Components:",n.components.length);for(let l of n.utilities)console.log(l.toString(),`
-`),t(l.toString());for(let l of n.components)i({".test-class":{"background-color":"green;"}});for(let l of n.keyframeUtilities)s(l.getMatchedContent(),l.getMatchedValues())}}export{w as MatchedAnimationRule,Le as ParseCSS,V as cssParser,G as resetData};
+`),t(l.toString());for(let l of n.components)i({".test-class":{transition:`background-color,
+color,
+display`}});for(let l of n.keyframeUtilities)s(l.getMatchedContent(),l.getMatchedValues())}}export{w as MatchedAnimationRule,Le as ParseCSS,V as cssParser,G as resetData};

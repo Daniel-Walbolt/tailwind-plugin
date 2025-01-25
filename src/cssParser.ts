@@ -1,18 +1,30 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import postcss, {
-	AtRule, Node, Plugin, Result, Rule
+	AtRule,
+	Node,
+	Plugin,
+	Result,
+	Rule
 } from 'postcss';
-import { LayerParserConfig, LayerListObject, MatchedAnimationRule } from './types';
 import {
-	log, warn, error, consoleListJoinString
+	LayerParserConfig,
+	LayerListObject,
+	MatchedAnimationRule,
+	FormattedRule
+} from './types';
+import {
+	log,
+	warn,
+	error,
+	consoleListJoinString
 } from './util/logger';
 import { globSync } from 'glob';
 import * as Keyframes from './util/keyframes';
 import * as Formatter from './util/nodeFormatter';
 
-export type ComponentMap = Map<string, Rule>;
-export type UtilityMap = Map<string, Rule>;
+export type ComponentMap = Map<string, FormattedRule>;
+export type UtilityMap = Map<string, FormattedRule>;
 export type MatchedKeyframeMap = Map<string, MatchedAnimationRule>;
 
 const components: ComponentMap = new Map();

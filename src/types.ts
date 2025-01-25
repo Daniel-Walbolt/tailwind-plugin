@@ -1,6 +1,10 @@
 import { AtRule, Rule } from 'postcss';
 import * as Formatter from './util/nodeFormatter';
 
+export type FormattedRule = {
+	[key: string]: FormattedRule | string;
+}
+
 export type LayerListObject = {
 	utilities: Rule[];
 	components: Rule[];
@@ -115,11 +119,6 @@ export type LayerParserConfig = {
 	 * Defaults to "File."
 	 */
 	commentType?: LayerLocation;
-
-	/**
-	 * Should the opening bracket for styles appear on the next line?
-	 */
-	openBracketNewLine: boolean;
 
 	/**
 	 * The prefix to use for matching keyframes to rules.
