@@ -58,20 +58,16 @@ export function formatNode(
 	}
 	//#endregion
 
-	const desiredBetween = config.openBracketNewLine ? `\n${ selectorIndents }` : ' ';
-
 	//#region Format the selectors for rules and parameters for AtRules
 	if (node.type === 'rule') {
 		const rule = node as Rule;
 		// Format the selectors to each appear on their own line.
 		const formattedSelectors = rule.selectors.join(`,\n${ selectorIndents }`);
 		rule.selector = formattedSelectors;
-		rule.raws.between = desiredBetween;
 	} else if (node.type == 'atrule') {
 		const atRule = node as AtRule;
 		atRule.params = atRule.params.trim();
 		atRule.raws.afterName = ' ';
-		atRule.raws.between = desiredBetween;
 	}
 	//#endregion
 

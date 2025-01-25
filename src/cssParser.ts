@@ -195,12 +195,6 @@ function verifyConfiguration(config: LayerParserConfig) {
 		config.commentType = "File";
 	}
 
-	config.openBracketNewLine ??= false;
-	if (verifyBoolean(config.openBracketNewLine)) {
-		warn("Invalid configuration for openBracketNewLine. Defaulting to false");
-		config.openBracketNewLine = false;
-	}
-
 	config.debug ??= false;
 	if (verifyBoolean(config.debug)) {
 		warn("Invalid configuration for debug. Defaulting to false.");
