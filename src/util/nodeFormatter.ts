@@ -63,7 +63,9 @@ export function formatNode(
 		const rule = node as Rule;
 		// Format the selectors to each appear on their own line.
 		const formattedSelectors = rule.selectors.join(`,\n${ selectorIndents }`);
-		rule.selector = formattedSelectors;
+		const formattedRule: FormattedRule = {
+			selector: formattedSelectors
+		};
 	} else if (node.type == 'atrule') {
 		const atRule = node as AtRule;
 		atRule.params = atRule.params.trim();

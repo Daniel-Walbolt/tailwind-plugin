@@ -72,7 +72,8 @@ export function matchKeyframesToRules(
 		// Get the current rule that needs keyframes matched to it
 		const rule = ruleAndKeyframes.rule;
 
-		// Remove the component / utility
+		// Remove the components and utilities that reference this keyframe.
+		// Only one instance of the keyframe should exist.
 		components.delete(ruleIdentifier);
 		utilities.delete(ruleIdentifier);
 

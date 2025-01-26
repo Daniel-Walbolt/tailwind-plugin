@@ -2,6 +2,11 @@ import { AtRule, Rule } from 'postcss';
 import * as Formatter from './util/nodeFormatter';
 
 export type FormattedRule = {
+	/** 
+	 *  Starts the representation of CSS as a JSON object.
+	 *  Contains declarations and nested CSS rules.
+	 */
+	selector: string;
 	[key: string]: FormattedRule | string;
 }
 
@@ -42,7 +47,7 @@ export class MatchedAnimationRule {
 	}
 
 	/** 
-	 * Provides all the content for tailwind to process. Defines the suffix used in intellisense and provides the CSS styles.	
+	 * Provides all the content for tailwind to process. Defines the suffix used in intellisense and provides the CSS styles.
 	 */
 	getMatchedContent(): MatchedAnimationRuleContent {
 		const matcher: MatchedAnimationRuleContent = {};
