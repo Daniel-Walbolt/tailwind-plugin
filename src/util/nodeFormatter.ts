@@ -4,7 +4,7 @@
 
 import { AtRule, Result, Rule } from "postcss";
 import * as Keyframes from "./keyframes";
-import { FormattedRule, LayerParserConfig } from "../types";
+import { LayerParserConfig, StringifiedJSON } from "../types";
 
 /**
  * Gets the identifier for a rule or atrule.
@@ -38,7 +38,7 @@ export function formatNode(
 	result: Result,
 	originalParentRule?: Rule,
 	nesting = 1
-): FormattedRule | undefined {
+) {
 	if (node.nodes == undefined || node.nodes.length == 0) {
 		return;
 	}

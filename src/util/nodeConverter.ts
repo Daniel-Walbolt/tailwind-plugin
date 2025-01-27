@@ -2,7 +2,7 @@ import { AtRule, Declaration, Rule } from "postcss";
 import { StringifiedJSON } from "../types";
 
 /** Converts a declaration and adds it to the provided object. Returns the modified object. */
-export function convertDeclartion (declaration: Declaration, formattedObject: StringifiedJSON = {}): StringifiedJSON {
+export function convertDeclaration (declaration: Declaration, formattedObject: StringifiedJSON = {}): StringifiedJSON {
 	if (declaration.type === 'decl') {
 		formattedObject[declaration.prop] = declaration.value;
 	}
@@ -16,7 +16,7 @@ export function convertRule (
 	/** 
 	 * True: the rule provided is added to the formattedObject using its selector.
 	 * 
-	 * False: returns the rule converted into an object ONLY. Not added to the provided object. Essentially menas there is no key value.
+	 * False: returns the rule converted into an object ONLY. Not added to the provided object. Essentially means there is no key value.
 	 */
 	formattedObject: StringifiedJSON = {},
 	includeRuleSelector = true,
@@ -26,7 +26,7 @@ export function convertRule (
 
 		for (const node of rule.nodes) {
 			if (node.type === 'decl') {
-				convertedRule = convertDeclartion(node, convertedRule);
+				convertedRule = convertDeclaration(node, convertedRule);
 			} else if (node.type === 'rule') {
 				convertedRule = convertRule(node, convertedRule);
 			} else if (node.type === 'atrule') {
@@ -52,7 +52,7 @@ export function convertAtRule (atRule: AtRule, formattedObject: StringifiedJSON 
 		if (atRule.nodes?.[Symbol.iterator]) {
 			for (const node of atRule.nodes) {
 				if (node.type === 'decl') {
-					convertedAtRule = convertDeclartion(node, convertedAtRule);
+					convertedAtRule = convertDeclaration(node, convertedAtRule);
 				} else if (node.type === 'rule') {
 					convertedAtRule = convertRule(node, convertedAtRule);
 				} else if (node.type === 'atrule') {
