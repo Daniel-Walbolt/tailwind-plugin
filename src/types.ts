@@ -1,15 +1,6 @@
 import { AtRule, Rule } from 'postcss';
 import * as Formatter from './util/nodeFormatter';
 
-export type FormattedRule = {
-	/** 
-	 *  Starts the representation of CSS as a JSON object.
-	 *  Contains declarations and nested CSS rules.
-	 */
-	selector: string;
-	[key: string]: FormattedRule | string;
-}
-
 export type LayerListObject = {
 	utilities: Rule[];
 	components: Rule[];
