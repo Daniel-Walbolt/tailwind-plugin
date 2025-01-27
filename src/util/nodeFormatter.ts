@@ -59,21 +59,21 @@ export function formatNode(
 	//#endregion
 
 	//#region Format the selectors for rules and parameters for AtRules
+	let selector: string | undefined = undefined;
+
 	if (node.type === 'rule') {
 		const rule = node as Rule;
 		// Format the selectors to each appear on their own line.
-		const formattedSelectors = rule.selectors.join(`,\n${ selectorIndents }`);
-		const formattedRule: FormattedRule = {
-			selector: formattedSelectors
-		};
+		selector = rule.selectors.join(`,\n${ selectorIndents }`);
 	} else if (node.type == 'atrule') {
 		const atRule = node as AtRule;
 		atRule.params = atRule.params.trim();
 		atRule.raws.afterName = ' ';
+		selector = `${ atRule.name }${ atRule.params.trim() }`;
 	}
 	//#endregion
 
-	//#region Format the nodes within this node recursively.
+	//#region Format the nodes within this node recursively. Declarations don't have any nested nodes.
 	for (const child of node.nodes) {
 		if (child.type == 'decl') {
 			if (originalParentRule.type == 'rule') {
@@ -87,12 +87,12 @@ export function formatNode(
 	//#endregion
 
 	//#region Add comment and spacing to node if it's in the first layer of nesting
-	if (nesting == 1) {
-		node.raws.before = '\n';
-		if (config.commentType !== "None") {
-			node.raws.before += `/* From ${ result.opts.from } */\n`;
-		}
-		node.raws.after = '\n';
-	}
+	// if (nesting == 1) {
+	// 	node.raws.before = '\n';
+	// 	if (config.commentType !== "None") {
+	// 		node.raws.before += `/* From ${ result.opts.from } */\n`;
+	// 	}
+	// 	node.raws.after = '\n';
+	// }
 	//#endregion
 }
