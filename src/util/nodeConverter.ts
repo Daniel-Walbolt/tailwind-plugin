@@ -48,7 +48,7 @@ export function convertAtRule (atRule: AtRule, formattedObject: StringifiedJSON 
 		let convertedAtRule: StringifiedJSON = {};
 
 		// Check that the AtRule has nodes that can be iterated over.
-		// Namely, @apply does NOT have iterable nodes.
+		// e.g. @apply does NOT have iterable nodes.
 		if (atRule.nodes?.[Symbol.iterator]) {
 			for (const node of atRule.nodes) {
 				if (node.type === 'decl') {
