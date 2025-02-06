@@ -1,6 +1,6 @@
 {
 	"name": "tailwind-layer-parser",
-	"version": "0.7.5",
+	"version": "0.7.6",
 	"description": "Provides tools to parse your custom .css files, format them, and add them to TailwindCSS's utility and component style lists.",
 	"private": false,
 	"main": "./dist/index.js",
@@ -44,6 +44,9 @@
 		"typescript": "^5.1.3",
 		"prettier": "^2.8.8",
 		"vue-eslint-parser": "^9.3.1"
+	},
+	"peerDependencies": {
+		"tailwindcss": "<4.0.0"
 	},
 	"dependencies": {
 		"glob": "^10.2.7",

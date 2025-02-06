@@ -7,9 +7,12 @@
 
 ---
 
+> **Warning**
+> TailwindCSS v4 does not yet (as of 2/05/25) provide adequate support for plugins. This plugin was meant to add components and utilities into the tailwind config, but the new plugin API forces every class to be a utility. Additionally, the way plugins matched keyframes to classes has changed without documentation, which has stopped this plugin's support for classes with animations. It pains me to say that for now at least, TailwindCSS v4 is incompatible with this plugin. 
+
 **Layer Parser** lets you autocomplete and preview custom css while utilizing the benefits of TailwindCSS.
 
-This is extremely useful for mono-repos using similar styling across several projects. Your custom CSS can be organized in dedicated files to use a more familiar CSS language rather than specifying classes through tailwind's native JSON syntax.
+This is extremely useful for mono-repos using similar styling across several projects. Your custom CSS can be organized in dedicated files to use a more familiar CSS language rather than specifying complex classes through tailwind's native JSON syntax.
 
 ---
 
