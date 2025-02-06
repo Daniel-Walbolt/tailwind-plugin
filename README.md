@@ -9,14 +9,16 @@
 
 **Layer Parser** lets you autocomplete and preview custom css while utilizing the benefits of TailwindCSS.
 
-This is extremely useful for mono-repos using similar styling across several projects. Your custom CSS can be organized in dedicated files to use a more familiar CSS language rather than specifying classes through tailwind's native JSON syntax.
+This is extremely useful for mono-repos using similar styling across several projects. Your custom CSS can be organized in dedicated files to use a more familiar CSS language with syntax highlighting rather than specifying classes through tailwind's syntax.
+
+This parser will use provided glob patterns to find css files and will extract the individual classes and add them to Tailwind's language server. Once in Tailwind's language server, your classes will show in intellisense, and will be included when Tailwind builds your CSS.
 
 ---
 
 ## Installation
 
 > **Warning**
-> This is a plugin for TailwindCSS, and can only be used in a project using [TailwindCSS as a PostCSS plugin](https://tailwindcss.com/docs/installation/using-postcss).
+> This is a plugin for TailwindCSS, and can only be used in a project utilizing the tailwind.config.js file.
 > Note, you should use Tailwind's intellisense plugin in order to see the benefits of this plugin.
 
 ```sh
@@ -136,7 +138,7 @@ For those wanting to customize your experience...
 > 
 > Determines whether or not to provide additional details to console print-outs.
 > 
-> Currently, there are print-outs for the folowing:
+> Currently, there are print-outs for the following:
 > - ALWAYS - Count of the rules that were not added because unlayeredBehavior ignored them.
 > - DEBUG - A list of the rules that were not added because unlayeredBehavior ignored them.
 > - ALWAYS - Count of the duplicate selectors found in target directory
@@ -145,24 +147,6 @@ For those wanting to customize your experience...
 >
 > Plugin output is located in the output terminal of VS Code, under "Tailwind CSS Intellisense".
 > <div style="text-align:center"><img src="https://github.com/Daniel-Walbolt/tailwind-plugin/blob/main/assets/TailwindOutputTerminal.png?raw=true" /></div>
->
-> ---
-> ```ts
-> commentType: "File" | "Absolute" | "None"
-> ```
->  Specify the comment you want above each of the previewed CSS rules. "File" shows only the rule's containing file's name. "Absolute" shows the exact path of the containing file. "None" removes the comment from the preview.
->
-> Defaults to "File".
->
-> ---
-> 
-> ```ts
-> openBracketNewLine: boolean
-> ```
-> Defaults to false.
-> 
-> Basically Allman style for CSS rules when set to true.
-> <div style="text-align:center"><img src="https://github.com/Daniel-Walbolt/tailwind-plugin/blob/main/assets/IntellisenseAllmanStylePreview.png?raw=true" /></div>
 >
 > ---
 >
@@ -176,7 +160,7 @@ For those wanting to customize your experience...
 > Defaults to "animate", and can not be blank.
 
 ## Extras
-There are two additonal exports from this plugin. 
+There are two additional exports from this plugin. 
 
 * ```cssParser``` is the underlying processor for globbing, parsing, modifying, and preparing the desired CSS. Also allows the adventurous developers to make their own tailwind plugin and do their own processing AFTER this plugin. 
 

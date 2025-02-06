@@ -1,9 +1,7 @@
-import { Rule, AtRule } from 'postcss';
+import { AtRule, Rule } from 'postcss';
 
 type LayerListObject = {
-    utilities: Rule[];
-    components: Rule[];
-    keyframeUtilities: MatchedAnimationRule[];
+    utilities: StringifiedJSON[];
 };
 type LayerLocation = "File" | "Absolute" | "None";
 type UnlayeredClassBehavior = "Ignore" | "Component" | "Utility";
@@ -60,15 +58,6 @@ type LayerParserConfig = {
      */
     directory?: string;
     /**
-     * Should this plugin parse classes that aren't in a component or utilities layer?
-     *
-     * Defaults to Utility
-     * @param Ignore Do not add classes that do not belong to a tailwind layer.
-     * @param Component Parse classes without a tailwind layer as components.
-     * @param Utility Parse classes without a tailwind layer as utilities.
-     */
-    unlayeredClassBehavior?: UnlayeredClassBehavior;
-    /**
      * Specify your own glob patterns to match css files.
      *
      * This plugin only accepts files ending in .css files, and will print out the files that don't end with .css.
@@ -80,18 +69,6 @@ type LayerParserConfig = {
      * Enable debug mode on this plugin so that you can see the file paths that are globbed.
      */
     debug?: boolean;
-    /**
-     * Determines the specificity of the comment above each rule.
-     *
-     * Helps to identify where the css styling comes from.
-     *
-     * Defaults to "File."
-     */
-    commentType?: LayerLocation;
-    /**
-     * Should the opening bracket for styles appear on the next line?
-     */
-    openBracketNewLine: boolean;
     /**
      * The prefix to use for matching keyframes to rules.
      * Due to the way tailwind expects plugins to group keyframes with rules, it requires a {prefix}-{suffix} combination.
@@ -121,10 +98,8 @@ declare function CSSParser(config: LayerParserConfig): LayerListObject;
  *
  * Call this method in TailwindCSS's plugin()
  */
-declare function ParseCSS(config: LayerParserConfig): ({ addUtilities, addComponents, matchUtilities }: {
+declare function ParseCSS(config: LayerParserConfig): ({ addUtilities }: {
     addUtilities: any;
-    addComponents: any;
-    matchUtilities: any;
 }) => void;
 
 export { LayerListObject, LayerLocation, LayerParserConfig, MatchedAnimationRule, MatchedNode, ParseCSS, StringifiedJSON, UnlayeredClassBehavior, CSSParser as cssParser, resetData };

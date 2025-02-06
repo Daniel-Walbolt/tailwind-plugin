@@ -6,7 +6,8 @@ export default {
 		plugin(
 			ParseCSS({
 				directory: `${__dirname}/css`,
-				debug: true
+				debug: true,
+				animationPrefix: "anim"
 			})
 		)
 	]

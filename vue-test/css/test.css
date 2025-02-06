@@ -1,5 +1,23 @@
 @layer components {
-	.test-class {
+	.custom-class {
+		&:has(input:disabled) {
+			background-color: blue;
+		}
 		background-color: red;
+		transition: background-color,
+			color,
+			border;
+		animation: test infinite linear 2s;
+	}
+
+	@keyframes test {
+		50%: {
+			scale: 2;
+		}
+	}
+
+	.test-class {
+		background-color: green;
+		color: red;
 	}
 }

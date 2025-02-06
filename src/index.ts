@@ -9,30 +9,12 @@ import { resetData, CSSParser } from './cssParser';
  * Call this method in TailwindCSS's plugin()
  */
 function ParseCSS(config: LayerParserConfig) {
-	return ({ addUtilities, addComponents, matchUtilities }) => {
+	return ({ addUtilities }) => {
 		resetData();
 		const classes = CSSParser(config);
 
-		console.log("Utilities:", classes.utilities.length, "Components:", classes.components.length);
-
 		for (const utility of classes.utilities) {
-			console.log(utility.toString(),"\n");
-			addUtilities(utility.toString());
-		}
-
-		for (const component of classes.components) {
-			addComponents({
-				'.test-class': {
-					'transition': 'background-color,\ncolor,\ndisplay'
-				}
-			});
-		}
-
-		for (const matchedKeyframe of classes.keyframeUtilities) {
-			matchUtilities(
-				matchedKeyframe.getMatchedContent(),
-				matchedKeyframe.getMatchedValues()
-			);
+			addUtilities(utility);
 		}
 	};
 }

@@ -2,7 +2,6 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import postcss, {
 	AtRule,
-	Node,
 	Plugin,
 	Result,
 	Rule
@@ -11,7 +10,7 @@ import {
 	LayerParserConfig,
 	LayerListObject,
 	MatchedAnimationRule,
-	FormattedRule
+	StringifiedJSON
 } from './types';
 import {
 	log,
@@ -20,18 +19,15 @@ import {
 	consoleListJoinString
 } from './util/logger';
 import { globSync } from 'glob';
-import * as Keyframes from './util/keyframes';
 import * as Formatter from './util/nodeFormatter';
+import * as Converter from './util/nodeConverter';
 
-export type ComponentMap = Map<string, FormattedRule>;
-export type UtilityMap = Map<string, FormattedRule>;
+export type ComponentMap = Map<string, StringifiedJSON>;
+export type UtilityMap = Map<string, StringifiedJSON>;
 export type MatchedKeyframeMap = Map<string, MatchedAnimationRule>;
 
-const components: ComponentMap = new Map();
 const utilities: UtilityMap = new Map();
-const matchedKeyframes: MatchedKeyframeMap = new Map();
 
-export type MissedKeyframes = Map<string, Set<string>>;
 export type MissedRules = Map<string, Set<string>>;
 export type DuplicateRules = Map<string, Map<string, number>>;
 
@@ -39,8 +35,6 @@ export type DuplicateRules = Map<string, Map<string, number>>;
 const duplicateRules: DuplicateRules = new Map();
 // Re-evaluated on each run. <selector, file names>
 const missedRules: MissedRules = new Map();
-// Re-evaluated on each run. <keyframe identifier, list of rules identifiers that missed it>>
-const missedKeyframes: MissedKeyframes = new Map();
 
 /**
  * Check if the target rule has been processed.
@@ -52,7 +46,7 @@ const missedKeyframes: MissedKeyframes = new Map();
 function hasNotProcessedRule(node: Rule | AtRule, result: Result) {
 	const ruleIdentifier = Formatter.getIdentifier(node);
 
-	if (utilities.has(ruleIdentifier) || components.has(ruleIdentifier)) {
+	if (utilities.has(ruleIdentifier)) {
 		const nodeStatistic: Map<string, number> = duplicateRules.get(ruleIdentifier);
 		if (nodeStatistic) {
 			const nodeFileCount: number = nodeStatistic?.get(result.opts.from);
@@ -73,86 +67,25 @@ function hasNotProcessedRule(node: Rule | AtRule, result: Result) {
 }
 
 /**
- * Processes rules or atrules into the component or utiltity lists based on their parent layers.
+ * Processes CSS rules into their JSON versions
  */
-function processRule(rule: Rule, result: Result, config: LayerParserConfig) {
+function processRule(rule: Rule, result: Result) {
+	// Ignore classes that are not immediate children of a layer
+	if (rule.parent?.type === "atrule") {
+		const atRuleParent = rule.parent as AtRule;
+		if (atRuleParent.params !== "components" && atRuleParent.params !== "utilities") {
+			// Ignore CSS rules that are not children of @layer components or @layer utilities
+			return;
+		}
+	} else if (rule.parent?.type !== "root") {
+		// Ignore classes that are not immediate children of the css file.
+		return;
+	}
 	const ruleIdentifier = Formatter.getIdentifier(rule);
-
-	// Check if the rule is at the base-level of the css file.
-	if (rule.parent?.type === 'root') {
-		if (hasNotProcessedRule(rule, result)) {
-			if (config.unlayeredClassBehavior === "Ignore") {
-				const files: Set<string> = missedRules.get(ruleIdentifier) ?? new Set();
-				files.add(result.opts.from as string);
-				missedRules.set(ruleIdentifier, files);
-				return;
-			}
-
-			Formatter.formatNode(rule, config, result, rule);
-			if (config.unlayeredClassBehavior === "Utility") {
-				utilities.set(ruleIdentifier, rule);
-			} else if (config.unlayeredClassBehavior === "Component") {
-				components.set(ruleIdentifier, rule);
-			}
-		}
-	} else if (rule.parent?.type == 'atrule') {
-		// Otherwise check if the at rule exists in a layer
-		if (hasNotProcessedRule(rule, result)) {
-			const atRuleParent: AtRule = rule.parent as AtRule;
-			// This rule is in an at rule, check whether it's a component or utility layer
-			if (atRuleParent.params === 'components') {
-				Formatter.formatNode(rule, config, result, rule);
-				components.set(ruleIdentifier, rule);
-			} else if (atRuleParent.params === 'utilities') {
-				Formatter.formatNode(rule, config, result, rule);
-				utilities.set(ruleIdentifier, rule);
-			}
-		}
+	if (hasNotProcessedRule(rule, result)) {
+		const formattedNode = Converter.convertRule(rule, {}, true);
+		utilities.set(ruleIdentifier, formattedNode);
 	}
-}
-
-function processAtRule(atRule: AtRule, result: Result, config: LayerParserConfig) {
-	Keyframes.attemptToProcessKeyframe(atRule, result, config);
-}
-
-/**
- * Get the top-most parent rule of the given node.
- */
-function getTopRule(node: Node, config: LayerParserConfig) {
-	let nextParent = node.parent;
-	let parent = node;
-	let isTopParent = false;
-	// Continue getting the node's parent until the parent's type is 'root'
-	while (!isTopParent && nextParent != null) {
-		if (nextParent.type === 'root') {
-			if (parent.type == 'rule') {
-				// If the current parent is a rule and the next parent is the root, that means there is no layer.
-				// Check if the user wants unlayed rules to be added.
-				if (config.unlayeredClassBehavior == "Ignore") {
-					return null;
-				}
-				isTopParent = true;
-				continue;
-			}
-		} else if (nextParent.type === 'atrule') {
-			const atRuleParent = nextParent as AtRule;
-
-			if (atRuleParent.name !== 'layer') {
-				continue;
-			}
-
-			if (atRuleParent.params === 'components' || atRuleParent.params === 'utilities') {
-				// The parent is @layer components or @layer utilities
-				isTopParent = true;
-				continue;
-			}
-		}
-
-		// Move to the next parent
-		parent = nextParent;
-		nextParent = nextParent.parent;
-	}
-	return parent;
 }
 
 /** 
@@ -160,17 +93,11 @@ function getTopRule(node: Node, config: LayerParserConfig) {
  * Parses css file and performs validation and adjustments on rules.
  * Adds processed rules to arrays.
  */
-function getParser(config: LayerParserConfig): (opts: any) => any {
+function getParser(): (opts: any) => any {
 	return () => {
 		return {
 			Rule(rule: Rule, { result }) {
-				processRule(rule, result, config);
-			},
-			AtRule:
-			{
-				keyframes: (atRule: AtRule, { result }) => {
-					processAtRule(atRule, result, config);
-				}
+				processRule(rule, result);
 			}
 		};
 	};
@@ -189,26 +116,10 @@ function verifyConfiguration(config: LayerParserConfig) {
 		config.directory = process.cwd();
 	}
 
-	config.commentType ??= "File";
-	if (config.commentType !== "File" && config.commentType != "Absolute" && config.commentType != "None") {
-		warn("Invalid configuration for commentType. Defaulting to 'File'");
-		config.commentType = "File";
-	}
-
 	config.debug ??= false;
 	if (verifyBoolean(config.debug)) {
 		warn("Invalid configuration for debug. Defaulting to false.");
 		config.debug = false;
-	}
-
-	config.unlayeredClassBehavior ??= "Utility";
-	if (config.unlayeredClassBehavior !== "Utility"
-		&& config.unlayeredClassBehavior !== "Component"
-		&& config.unlayeredClassBehavior !== "Ignore"
-	) {
-		// User has forcefully input class behavior other than the provided type.
-		warn("Invalid configuration for unlayedClassBehavior. Defaulting to Utility");
-		config.unlayeredClassBehavior = "Utility";
 	}
 
 	config.globPatterns ??= ['**/*.css'];
@@ -227,13 +138,10 @@ function verifyConfiguration(config: LayerParserConfig) {
  * Used by default by the plugin helper function.
  */
 export function resetData() {
-	if (components.size == 0 && utilities.size == 0) {
+	if (utilities.size == 0) {
 		log("Reset parsed components and utilities.");
 	}
-	components.clear();
 	utilities.clear();
-	matchedKeyframes.clear();
-	Keyframes.resetData();
 }
 
 export function CSSParser(config: LayerParserConfig): LayerListObject {
@@ -245,9 +153,7 @@ export function CSSParser(config: LayerParserConfig): LayerListObject {
 					This would result in a serious performance problem, and thus parsing has been skipped.
 				`);
 				return {
-					components: [],
 					utilities: [],
-					keyframeUtilities: []
 				};
 			}
 		}
@@ -258,7 +164,6 @@ export function CSSParser(config: LayerParserConfig): LayerListObject {
 	// Reset to avoid duplicates
 	duplicateRules.clear();
 	missedRules.clear();
-	missedKeyframes.clear();
 
 	// Resolve the directory provided by the user
 	const resolvedDirectory = resolve(config.directory);
@@ -276,30 +181,17 @@ export function CSSParser(config: LayerParserConfig): LayerListObject {
 	// Initialize the custom parser
 	const cssParser: Plugin = {
 		postcssPlugin: 'layer-parser',
-		prepare: getParser(config),
+		prepare: getParser(),
 	};
 
 	const invalidFiles = [];
 	const processor = postcss([cssParser]);
-	let parseFile: (fileName: string, fullPath: string) => void;
-	switch (config.commentType) {
-		case "Absolute":
-			parseFile = (_: string, fullPath: string) => {
-				const file = readFileSync(fullPath, 'utf8');
-				processor.process(file, { from: fullPath, to: fullPath })
-					// For some reason, .then() is required to make the processor work.
-					.then();
-			};
-			break;
-		default:
-			parseFile = (fileName: string, fullPath: string) => {
-				const file = readFileSync(fullPath, 'utf8');
-				processor.process(file, { from: fileName, to: fileName })
-					// For some reason, .then() is required to make the processor work.
-					.then();
-			};
-			break;
-	}
+	const parseFile: (fileName: string, fullPath: string) => void = (fileName: string, fullPath: string) => {
+		const file = readFileSync(fullPath, 'utf8');
+		processor.process(file, { from: fileName, to: fileName })
+			// For some reason, .then() is required to make the processor work.
+			.then();
+	};
 
 	for (const fileName of result) {
 		if (!fileName.endsWith('.css')) {
@@ -354,29 +246,7 @@ export function CSSParser(config: LayerParserConfig): LayerListObject {
 		warn(warnMessage);
 	}
 
-	// Now that all keyframes have been processed, add them to the rules that have animations defined
-	Keyframes.matchKeyframesToRules(matchedKeyframes, components, utilities, missedKeyframes, config);
-
-	if (missedKeyframes.size > 0) {
-		let debugMessage = "";
-		let missedKeyframeCount = 0;
-		for (const [ keyframeIdentifier, ruleSelectors ] of missedKeyframes) {
-			debugMessage += `\n\t${ keyframeIdentifier }`;
-			missedKeyframeCount += ruleSelectors.size;
-			for (const rule of ruleSelectors) {
-				debugMessage += `${ consoleListJoinString(2) }${ rule }`;
-			}
-		}
-		let warnMessage = `Could not find ${ missedKeyframeCount } keyframes that were referenced by the searched CSS files.`;
-		if (config.debug) {
-			warnMessage += debugMessage;
-		}
-		warn(warnMessage);
-	}
-
 	return {
-		utilities: Array.from(utilities.values()),
-		components: Array.from(components.values()),
-		keyframeUtilities: Array.from(matchedKeyframes.values())
+		utilities: Array.from(utilities.values())
 	};
 }

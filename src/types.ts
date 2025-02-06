@@ -2,9 +2,7 @@ import { AtRule, Rule } from 'postcss';
 import * as Formatter from './util/nodeFormatter';
 
 export type LayerListObject = {
-	utilities: Rule[];
-	components: Rule[];
-	keyframeUtilities: MatchedAnimationRule[]
+	utilities: StringifiedJSON[];
 };
 
 export type LayerLocation = "File" | "Absolute" | "None";
@@ -84,16 +82,6 @@ export type LayerParserConfig = {
 	directory?: string;
 
 	/**
-	 * Should this plugin parse classes that aren't in a component or utilities layer?
-	 * 
-	 * Defaults to Utility
-	 * @param Ignore Do not add classes that do not belong to a tailwind layer.
-	 * @param Component Parse classes without a tailwind layer as components.
-	 * @param Utility Parse classes without a tailwind layer as utilities.
-	 */
-	unlayeredClassBehavior?: UnlayeredClassBehavior;
-
-	/**
 	 * Specify your own glob patterns to match css files.
 	 *
 	 * This plugin only accepts files ending in .css files, and will print out the files that don't end with .css.
@@ -106,15 +94,6 @@ export type LayerParserConfig = {
 	 * Enable debug mode on this plugin so that you can see the file paths that are globbed.
 	 */
 	debug?: boolean;
-
-	/**
-	 * Determines the specificity of the comment above each rule.
-	 * 
-	 * Helps to identify where the css styling comes from.
-	 * 
-	 * Defaults to "File."
-	 */
-	commentType?: LayerLocation;
 
 	/**
 	 * The prefix to use for matching keyframes to rules.

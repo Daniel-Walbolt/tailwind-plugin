@@ -2,7 +2,10 @@ import { AtRule, Declaration, Rule } from "postcss";
 import { StringifiedJSON } from "../types";
 
 /** Converts a declaration and adds it to the provided object. Returns the modified object. */
-export function convertDeclaration (declaration: Declaration, formattedObject: StringifiedJSON = {}): StringifiedJSON {
+export function convertDeclaration (
+	declaration: Declaration,
+	formattedObject: StringifiedJSON = {}
+): StringifiedJSON {
 	if (declaration.type === 'decl') {
 		formattedObject[declaration.prop] = declaration.value;
 	}
@@ -19,7 +22,7 @@ export function convertRule (
 	 * False: returns the rule converted into an object ONLY. Not added to the provided object. Essentially means there is no key value.
 	 */
 	formattedObject: StringifiedJSON = {},
-	includeRuleSelector = true,
+	includeRuleSelector = true
 ): StringifiedJSON {
 	if (rule.type === 'rule') {
 		let convertedRule: StringifiedJSON = {};
@@ -28,9 +31,9 @@ export function convertRule (
 			if (node.type === 'decl') {
 				convertedRule = convertDeclaration(node, convertedRule);
 			} else if (node.type === 'rule') {
-				convertedRule = convertRule(node, convertedRule);
+				convertedRule = convertRule(node, convertedRule, includeRuleSelector);
 			} else if (node.type === 'atrule') {
-				convertedRule = convertAtRule(node, convertedRule);
+				convertedRule = convertAtRule(node, convertedRule, includeRuleSelector);
 			}
 		}
 		if (includeRuleSelector) {
@@ -43,7 +46,11 @@ export function convertRule (
 	}
 }
 
-export function convertAtRule (atRule: AtRule, formattedObject: StringifiedJSON = {}): StringifiedJSON {
+export function convertAtRule (
+	atRule: AtRule,
+	formattedObject: StringifiedJSON = {},
+	includeRuleSelector = true
+): StringifiedJSON {
 	if (atRule.type === 'atrule') {
 		let convertedAtRule: StringifiedJSON = {};
 
@@ -54,15 +61,14 @@ export function convertAtRule (atRule: AtRule, formattedObject: StringifiedJSON 
 				if (node.type === 'decl') {
 					convertedAtRule = convertDeclaration(node, convertedAtRule);
 				} else if (node.type === 'rule') {
-					convertedAtRule = convertRule(node, convertedAtRule);
+					convertedAtRule = convertRule(node, convertedAtRule, includeRuleSelector);
 				} else if (node.type === 'atrule') {
 					// Don't know why an atrule would be in another atrule...
-					convertedAtRule = convertAtRule(node, convertedAtRule);
+					convertedAtRule = convertAtRule(node, convertedAtRule, includeRuleSelector);
 				}
 			}
 		}
 		formattedObject[`@${ atRule.name } ${ atRule.params }`] = convertedAtRule;
-
 		return formattedObject;
 	}
 }
